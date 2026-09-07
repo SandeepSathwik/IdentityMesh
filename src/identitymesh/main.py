@@ -12,6 +12,7 @@ from starlette.middleware.base import RequestResponseEndpoint
 
 from identitymesh import __version__
 from identitymesh.config import Settings
+from identitymesh.dependencies import build_readiness_probes
 from identitymesh.health import DependencyProbe, HealthResponse, ReadinessResponse, evaluate_probes
 
 
@@ -22,7 +23,11 @@ def create_app(
     """Build an isolated application instance for production or tests."""
 
     application_settings = settings or Settings()
-    probes = dict(readiness_probes or {})
+    probes = dict(
+        build_readiness_probes(application_settings)
+        if readiness_probes is None
+        else readiness_probes
+    )
 
     @asynccontextmanager
     async def lifespan(_: FastAPI) -> AsyncIterator[None]:

@@ -1,0 +1,82 @@
+name: identitymesh
+
+services:
+  postgresql:
+    image: postgres:17.11-alpine3.24
+    environment:
+      POSTGRES_DB: identitymesh
+      POSTGRES_USER: identitymesh
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U identitymesh -d identitymesh"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
+
+  neo4j:
+    image: neo4j:5.26.30-community
+    environment:
+      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD:?Set NEO4J_PASSWORD in .env}
+      NEO4J_server_memory_heap_initial__size: 256m
+      NEO4J_server_memory_heap_max__size: 512m
+      NEO4J_server_memory_pagecache_size: 256m
+    ports:
+      - "127.0.0.1:7474:7474"
+      - "127.0.0.1:7687:7687"
+    volumes:
+      - neo4j-data:/data
+      - neo4j-logs:/logs
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "cypher-shell -u neo4j -p \"$${NEO4J_AUTH#*/}\" 'RETURN 1' >/dev/null 2>&1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+    environment:
+      IDENTITYMESH_ENVIRONMENT: local
+      IDENTITYMESH_API_HOST: 0.0.0.0
+      IDENTITYMESH_API_PORT: 8000
+      IDENTITYMESH_POSTGRES_DSN: postgresql://identitymesh:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@postgresql:5432/identitymesh
+      IDENTITYMESH_NEO4J_URI: bolt://neo4j:7687
+      IDENTITYMESH_NEO4J_USERNAME: neo4j
+      IDENTITYMESH_NEO4J_PASSWORD: ${NEO4J_PASSWORD:?Set NEO4J_PASSWORD in .env}
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      postgresql:
+        condition: service_healthy
+      neo4j:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/ready', timeout=3)",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
+    restart: unless-stopped
+
+volumes:
+  postgres-data:
+  neo4j-data:
+  neo4j-logs:

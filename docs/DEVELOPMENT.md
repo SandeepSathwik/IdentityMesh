@@ -34,6 +34,48 @@ make down
 
 The exact task runner may differ.
 
+## Current M0 setup
+
+Create an isolated Python environment and install the locked dependencies:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.lock
+.\.venv\Scripts\python.exe -m pip install --no-deps -e .
+```
+
+Copy `.env.example` to `.env` and set unique, local-only values for
+`POSTGRES_PASSWORD` and `NEO4J_PASSWORD`. Do not reuse real credentials.
+
+Start the API, PostgreSQL, and Neo4j:
+
+```powershell
+docker compose up --build --detach --wait
+```
+
+The services bind only to the local loopback interface:
+
+- API: `http://127.0.0.1:8000`
+- Neo4j browser: `http://127.0.0.1:7474`
+- Neo4j Bolt: `bolt://127.0.0.1:7687`
+- PostgreSQL: `127.0.0.1:5432`
+
+Verify authenticated dependency readiness:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:8000/health/ready
+```
+
+Stop the services while retaining local database volumes:
+
+```powershell
+docker compose down
+```
+
+To intentionally delete all local IdentityMesh database data, add `--volumes`.
+This cleanup command must not be used for an environment containing data that
+needs to be retained.
+
 ## Branch model
 Suggested:
 - `main` protected
