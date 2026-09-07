@@ -10,3 +10,23 @@ START_HERE.md
 # Dedicated AI-agent product documentation must remain local.
 docs/AGENT_IDENTITY_MODEL.md
 docs/ENGINEERING_AUTONOMY.md
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.coverage
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+htmlcov/
+
+# Virtual environments and local configuration
+.venv/
+.env
+
+# IDE and operating-system files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
