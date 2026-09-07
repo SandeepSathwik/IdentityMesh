@@ -1,0 +1,50 @@
+# Documentation File Manifest
+
+This pack contains the following repository-ready Markdown files:
+
+- `.github/ISSUE_TEMPLATE/bug.md`
+- `.github/ISSUE_TEMPLATE/feature.md`
+- `.github/ISSUE_TEMPLATE/security-improvement.md`
+- `.github/PULL_REQUEST_TEMPLATE.md`
+- `AGENTS.md`
+- `CODE_OF_CONDUCT.md`
+- `CONTRIBUTING.md`
+- `README.md`
+- `SECURITY.md`
+- `START_HERE.md`
+- `docs/AGENT_IDENTITY_MODEL.md`
+- `docs/API_GUIDELINES.md`
+- `docs/ARCHITECTURE.md`
+- `docs/ATTACK_PATH_ENGINE.md`
+- `docs/BACKLOG.md`
+- `docs/COST_AND_ENVIRONMENT.md`
+- `docs/DATA_MODEL.md`
+- `docs/DECISION_LOG.md`
+- `docs/DEFINITION_OF_DONE.md`
+- `docs/DEMO_PLAN.md`
+- `docs/DEVELOPMENT.md`
+- `docs/ENGINEERING_AUTONOMY.md`
+- `docs/FAILURE_MODES.md`
+- `docs/GOVERNANCE.md`
+- `docs/IMPLEMENTATION_STRATEGY.md`
+- `docs/INTEGRATION_CONTRACTS.md`
+- `docs/LABS.md`
+- `docs/METRICS.md`
+- `docs/MILESTONES.md`
+- `docs/OBSERVABILITY.md`
+- `docs/OPEN_QUESTIONS.md`
+- `docs/POLICY_ENGINE.md`
+- `docs/PRD.md`
+- `docs/PROJECT_CHARTER.md`
+- `docs/RELEASE_PROCESS.md`
+- `docs/REQUIREMENTS.md`
+- `docs/RISK_MODEL.md`
+- `docs/ROADMAP.md`
+- `docs/SCOPE.md`
+- `docs/SECURE_CODING.md`
+- `docs/SECURITY_REVIEW_CHECKLIST.md`
+- `docs/STYLE_GUIDE.md`
+- `docs/TESTING_STRATEGY.md`
+- `docs/THREAT_MODEL.md`
+- `docs/adr/0000-template.md`
+- `docs/adr/README.md`
