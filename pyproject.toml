@@ -8,10 +8,12 @@ version = "0.0.1"
 description = "Identity security for humans, cloud workloads, and autonomous AI agents."
 requires-python = ">=3.10"
 dependencies = [
+    "alembic>=1.19,<2",
     "asyncpg>=0.31,<1",
     "fastapi>=0.115,<1",
     "neo4j>=6.3,<7",
     "pydantic-settings>=2.6,<3",
+    "sqlalchemy>=2,<3",
     "uvicorn[standard]>=0.32,<1",
 ]
 
@@ -59,3 +61,7 @@ select = ["E", "F", "I", "N", "S", "UP"]
 python_version = "3.10"
 strict = true
 packages = ["identitymesh"]
+
+[tool.alembic]
+script_location = "%(here)s/migrations"
+prepend_sys_path = ["."]

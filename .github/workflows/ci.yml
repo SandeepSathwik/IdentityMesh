@@ -11,6 +11,20 @@ permissions:
 jobs:
   quality:
     runs-on: ubuntu-latest
+    services:
+      postgresql:
+        image: postgres:17.11-alpine3.24
+        env:
+          POSTGRES_DB: identitymesh_test
+          POSTGRES_USER: identitymesh_test
+          POSTGRES_PASSWORD: identitymesh-ci-only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U identitymesh_test -d identitymesh_test"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
     strategy:
       matrix:
         python-version: ["3.10", "3.12"]
@@ -38,5 +52,12 @@ jobs:
       - name: Type check
         run: mypy
 
+      - name: Apply database migrations
+        env:
+          IDENTITYMESH_POSTGRES_DSN: postgresql://identitymesh_test:identitymesh-ci-only@127.0.0.1:5432/identitymesh_test
+        run: alembic --config pyproject.toml upgrade head
+
       - name: Test
+        env:
+          IDENTITYMESH_TEST_POSTGRES_DSN: postgresql://identitymesh_test:identitymesh-ci-only@127.0.0.1:5432/identitymesh_test
         run: pytest --cov --cov-report=term-missing

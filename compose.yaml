@@ -44,6 +44,18 @@ services:
       start_period: 30s
     restart: unless-stopped
 
+  migrate:
+    build:
+      context: .
+    command: ["python", "-m", "alembic", "--config", "pyproject.toml", "upgrade", "head"]
+    environment:
+      IDENTITYMESH_ENVIRONMENT: local
+      IDENTITYMESH_POSTGRES_DSN: postgresql://identitymesh:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@postgresql:5432/identitymesh
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    restart: "no"
+
   api:
     build:
       context: .
@@ -58,8 +70,8 @@ services:
     ports:
       - "127.0.0.1:8000:8000"
     depends_on:
-      postgresql:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
       neo4j:
         condition: service_healthy
     healthcheck:
