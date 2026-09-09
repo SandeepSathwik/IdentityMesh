@@ -303,7 +303,8 @@ identitymesh/
 └── README.md
 ```
 
-This is a blueprint, not a rigid requirement. Coding agents may propose a different structure when there is a clear engineering reason.
+This is a blueprint, not a rigid requirement. Contributors may propose a different structure
+when there is a clear engineering reason.
 
 ---
 
@@ -324,4 +325,5 @@ IdentityMesh v1.0 is successful when it can demonstrate:
 - architecture and security documentation
 - a compelling end-to-end demo
 
-The project should be explainable in a technical interview without relying on generated code as a black box.
+The project should be explainable in a technical interview without treating implementation
+details as a black box.

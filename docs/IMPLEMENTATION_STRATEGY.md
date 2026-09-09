@@ -31,9 +31,10 @@ Implement enough to:
 
 Then expand entity coverage.
 
-Status: read-only, paginated AWS IAM role collection and its validated evidence contract are
-implemented. Normalization, persistence of role evidence, graph projection, API exposure, and
-UI rendering remain before this slice is complete.
+Status: read-only, paginated AWS IAM role collection, its validated evidence contract, and
+provider-neutral role normalization are implemented. Persistence of role evidence and
+normalized principals, graph projection, API exposure, and UI rendering remain before this
+slice is complete.
 
 ## Slice 2 — One attack path
 Create a controlled AWS path and detect it.

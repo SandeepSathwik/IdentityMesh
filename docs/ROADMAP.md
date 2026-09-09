@@ -16,8 +16,9 @@ Major scope changes should be documented.
 
 Phase 0 is substantially complete: the repository, local service stack, CI baseline,
 configuration validation, health checks, persistence decision, migrations, and snapshot
-lifecycle are in place. The first Phase 1 increment collects AWS IAM roles, but it is not yet
-connected to normalization, persistence, graph projection, the API, or a dashboard.
+lifecycle are in place. The first Phase 1 increments collect AWS IAM roles and normalize them
+into provider-neutral principals with observed provenance. Collection orchestration,
+evidence/principal persistence, graph projection, the API, and the dashboard remain.
 
 This status note does not change the phase outcomes or expand V1 scope.
 

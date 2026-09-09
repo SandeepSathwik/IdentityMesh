@@ -236,7 +236,7 @@ that any principal can assume the role and does not compute effective permission
 - create ADRs for foundational schema changes
 
 ## Open design space
-Coding agents may propose:
+Contributors may propose:
 - Pydantic model hierarchy
 - SQL schema
 - Neo4j labels

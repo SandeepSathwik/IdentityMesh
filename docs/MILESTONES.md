@@ -25,6 +25,10 @@ Exit:
 Target: End Month 2
 Release: v0.1
 
+Status: in progress. AWS IAM role collection and role-to-principal normalization are complete.
+Persistence, graph import, API inspection, dashboard rendering, and broader AWS identity
+coverage remain.
+
 Deliverables:
 - AWS collector
 - normalized identity model

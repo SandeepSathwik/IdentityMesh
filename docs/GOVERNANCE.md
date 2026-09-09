@@ -11,7 +11,7 @@ The human maintainer owns:
 - public claims
 - risk acceptance
 
-AI coding agents and future contributors may propose changes.
+Maintainers and contributors may propose changes.
 
 ## Decision categories
 

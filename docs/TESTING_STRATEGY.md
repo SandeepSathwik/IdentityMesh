@@ -51,6 +51,10 @@ responses. Tests cover pagination, complete-empty results, later-page failure, a
 authentication failure, throttling, connection failure, malformed responses, provenance, and
 schema validation without requiring cloud credentials.
 
+The AWS role normalizer has deterministic contract tests for observed provenance, stable
+identity across snapshots, distinct identity after role recreation, explicit deferred fields,
+rejection of unvalidated input, and timezone validation.
+
 ### End-to-end tests
 Reference scenarios:
 - discovery -> graph -> finding
@@ -145,10 +149,10 @@ Prefer:
 Avoid:
 `test_case_17`
 
-## AI-generated code
-AI-generated implementation must not receive reduced testing standards.
+## Implementation review
+No implementation should receive reduced testing standards.
 
-The coding agent should:
+The contributor should:
 - write tests with the feature
 - explain edge cases
 - identify untested behavior

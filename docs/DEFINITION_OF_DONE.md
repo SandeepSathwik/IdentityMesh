@@ -43,7 +43,7 @@ A feature is not complete until the relevant items below are satisfied.
 - security behavior documented
 - ADR created if major decision
 
-## AI-generated implementation
+## Implementation review
 - code understood by human owner
 - no unverifiable claims
 - no copied incompatible code/license

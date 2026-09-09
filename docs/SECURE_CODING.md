@@ -94,9 +94,9 @@ CI should include:
 - container scanning as images are introduced
 - SBOM for releases when practical
 
-## AI-generated code
-AI output must receive normal review.
-Special attention:
+## Contributed-code review
+All contributed code must receive normal review.
+Pay special attention to:
 - invented APIs
 - insecure defaults
 - excessive permissions

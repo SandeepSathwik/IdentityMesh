@@ -36,7 +36,7 @@ Current AWS gap reason codes are:
 - `AWS_MALFORMED_RESPONSE`
 
 The contract contains factual trust-policy evidence but makes no effective-permission,
-ownership, or attack-path inference. Collector-to-normalizer wiring is not yet implemented.
+ownership, or attack-path inference.
 
 Normalizer must:
 - validate
@@ -44,6 +44,12 @@ Normalizer must:
 - preserve source IDs
 - preserve provenance
 - report unsupported fields explicitly
+
+The first implemented normalizer maps `AwsRoleEvidence` into
+`identitymesh.principal/v1`. It uses the AWS account ID and immutable role ID to derive a
+stable internal UUID, preserves observed source provenance, and reports evidence fields
+deferred from the principal contract. Collection orchestration and persistence wiring are not
+yet implemented.
 
 ## Normalizer -> Graph
 Graph input should contain:

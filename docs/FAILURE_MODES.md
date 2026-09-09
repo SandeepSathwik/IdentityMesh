@@ -25,6 +25,11 @@ successful empty response is `complete`; it is not interchangeable with unavaila
 Collector attempt status and persisted snapshot status are separate concepts. The integration
 that maps collection results into snapshot transitions has not yet been implemented.
 
+The AWS role normalizer accepts only validated role evidence. It preserves source provenance,
+does not convert trust-policy text into an access conclusion, and reports provider fields
+deferred from the principal contract. Invalid or unavailable provider data must not produce a
+normalized principal.
+
 ## Kubernetes unavailable
 Same general pattern as provider failure.
 

@@ -89,8 +89,8 @@ Prefer a simpler reliable implementation before introducing distributed-system c
 ### Modular architecture
 Collectors, graph analysis, policy, runtime gateway, and telemetry should remain independently testable.
 
-### Agent autonomy within constraints
-AI coding agents are encouraged to choose libraries, algorithms, data structures, and implementation strategies when:
+### Engineering autonomy within constraints
+Contributors are encouraged to choose libraries, algorithms, data structures, and implementation strategies when:
 - security invariants are maintained
 - public contracts remain compatible
 - tests remain deterministic
@@ -157,7 +157,7 @@ Human project owner:
 - validates demos and claims
 - understands every critical subsystem
 
-AI coding agents:
+Engineering contributors:
 - propose designs
 - implement scoped work
 - write tests
@@ -167,4 +167,5 @@ AI coding agents:
 - suggest refactors
 - benchmark alternatives
 
-AI agents must not silently alter project goals or weaken security controls to make tests pass.
+Contributors must not silently alter project goals or weaken security controls to make tests
+pass.

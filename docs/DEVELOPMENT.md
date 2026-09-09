@@ -34,7 +34,7 @@ make down
 
 The exact task runner may differ.
 
-## Current M0 setup
+## Current local setup
 
 Create an isolated Python environment and install the locked dependencies:
 
@@ -175,7 +175,7 @@ A schema change should include:
 2. define objective
 3. define acceptance criteria
 4. list security constraints
-5. coding agent proposes approach
+5. contributor proposes approach
 6. implement
 7. test
 8. security review
@@ -193,7 +193,7 @@ Refactoring is encouraged when:
 Avoid giant speculative rewrites.
 
 ## Debugging
-When agent-generated code fails:
+When proposed code fails:
 1. capture exact error
 2. reproduce minimally
 3. identify violated assumption

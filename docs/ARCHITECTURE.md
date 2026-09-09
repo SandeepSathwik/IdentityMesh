@@ -78,6 +78,12 @@ Maps provider-specific objects into IdentityMesh domain entities.
 
 Normalization should retain enough source metadata to reconstruct why a fact exists.
 
+The first implemented normalizer maps validated AWS IAM role evidence into the versioned
+`identitymesh.principal/v1` contract. It creates a deterministic principal identity from the
+AWS account and immutable role ID, records observed provenance, and explicitly defers
+provider fields that belong in later policy or relationship models. It makes no effective
+permission or role-assumption inference.
+
 ### Identity graph subsystem
 Maintains graph representation and relationship semantics.
 
