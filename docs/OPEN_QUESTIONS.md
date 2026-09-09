@@ -1,13 +1,15 @@
 # Open Questions
 
-These questions are intentionally unresolved. AI agents should treat them as opportunities for engineering research, prototypes, benchmarks, and ADRs.
+These questions are intentionally unresolved. Contributors should treat them as opportunities
+for engineering research, prototypes, benchmarks, and ADRs.
 
 ## Architecture
 - Modular monolith or early service split?
 - What should run synchronously versus in workers?
 - Is Redis needed before scale justifies it?
 - What is the cleanest deployment boundary for the runtime gateway?
-- How should snapshots flow between relational and graph storage?
+- What validation must a Neo4j projection pass before an authoritative PostgreSQL snapshot is promoted?
+- What retention and cleanup policy should apply to evidence, failed snapshots, and old graph projections?
 
 ## Graph
 - Which labels and relationship types produce the clearest model?

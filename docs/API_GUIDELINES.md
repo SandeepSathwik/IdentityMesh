@@ -26,6 +26,17 @@ Suggested:
 }
 ```
 
+## Current endpoints
+
+The pre-alpha API currently exposes only operational health endpoints:
+
+- `GET /health/live` — process liveness
+- `GET /health/ready` — authenticated PostgreSQL and Neo4j dependency readiness
+
+Readiness returns `503` if a required dependency cannot be verified. Responses expose service
+state but never credentials or connection strings. Collector, snapshot, graph, and
+authorization endpoints are not yet public APIs.
+
 ## Authorization endpoint
 A conceptual request:
 

@@ -12,6 +12,15 @@ The team may reorder internal tasks when:
 
 Major scope changes should be documented.
 
+## Current position
+
+Phase 0 is substantially complete: the repository, local service stack, CI baseline,
+configuration validation, health checks, persistence decision, migrations, and snapshot
+lifecycle are in place. The first Phase 1 increment collects AWS IAM roles, but it is not yet
+connected to normalization, persistence, graph projection, the API, or a dashboard.
+
+This status note does not change the phase outcomes or expand V1 scope.
+
 ---
 
 ## Phase 0 — Foundation

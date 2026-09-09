@@ -5,7 +5,8 @@ Define what should happen when dependencies or assumptions fail.
 
 ## AWS unavailable
 Behavior:
-- collection marked failed
+- collection attempt returns `failed` with a stable reason code and safe message
+- no roles are emitted from an attempt that cannot establish caller identity
 - previous snapshot remains intact
 - UI shows staleness
 - no claim that missing identities were deleted
@@ -13,9 +14,16 @@ Behavior:
 ## Partial AWS permissions
 Behavior:
 - successful data retained
-- missing API capabilities listed
-- snapshot labeled incomplete
+- missing API capabilities represented as bounded collection gaps
+- collection attempt labeled `partial`
 - findings that depend on missing evidence may be downgraded or suppressed according to explicit logic
+
+The current role collector preserves valid roles from earlier pages when a later page fails.
+If no valid roles remain after an IAM failure, the attempt is `failed`, not `partial`. A
+successful empty response is `complete`; it is not interchangeable with unavailable data.
+
+Collector attempt status and persisted snapshot status are separate concepts. The integration
+that maps collection results into snapshot transitions has not yet been implemented.
 
 ## Kubernetes unavailable
 Same general pattern as provider failure.
@@ -79,6 +87,9 @@ Discard or label as failed advisory output.
 - stop startup if schema is unsafe
 - do not partially reinterpret old data
 - provide clear recovery guidance
+
+The current Compose topology enforces this by gating API startup on successful completion of a
+one-shot Alembic migration service.
 
 ## Cloud lab teardown failure
 - surface remaining resources

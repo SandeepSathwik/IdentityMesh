@@ -12,6 +12,32 @@ Collector output must include:
 - raw or structured evidence
 - collection status
 
+The first implemented contract is the AWS IAM role collector:
+
+- role evidence schema: `aws.iam.role/v1`
+- collection envelope schema: `aws.iam.role.collection/v1`
+- provider operations: `sts:GetCallerIdentity` and paginated `iam:ListRoles`
+- statuses: `complete`, `partial`, and `failed`
+- gaps: operation, stable reason code, retryability, and a bounded safe message
+
+`complete` includes verified caller identity and no gaps, including when the role list is
+legitimately empty. `partial` includes verified caller identity, at least one valid role, and
+one or more gaps. `failed` contains no roles and at least one gap. This distinction prevents
+unavailable or malformed provider data from being interpreted as absence.
+
+Current AWS gap reason codes are:
+
+- `AWS_ACCESS_DENIED`
+- `AWS_AUTHENTICATION_FAILED`
+- `AWS_THROTTLED`
+- `AWS_SERVICE_UNAVAILABLE`
+- `AWS_CONNECTION_FAILED`
+- `AWS_API_ERROR`
+- `AWS_MALFORMED_RESPONSE`
+
+The contract contains factual trust-policy evidence but makes no effective-permission,
+ownership, or attack-path inference. Collector-to-normalizer wiring is not yet implemented.
+
 Normalizer must:
 - validate
 - produce internal IDs

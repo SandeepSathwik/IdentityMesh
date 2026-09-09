@@ -100,7 +100,10 @@ Emits security events and audit records.
 Explores identities, evidence, paths, policies, findings, and events.
 
 ## Data ownership
-A recommended separation:
+The persistence boundary is defined by
+[ADR-0001](adr/0001-persistence-and-snapshot-projection.md): PostgreSQL is authoritative for
+operational state and collected evidence; Neo4j contains versioned, rebuildable graph
+projections. They are not co-equal sources of truth.
 
 ### PostgreSQL
 Good fit for:
@@ -124,6 +127,9 @@ Good fit for:
 - attack paths
 - graph projections
 
+Graph data must be keyed by snapshot and projection version. Readers must not combine facts
+from different snapshots or expose a projection before its snapshot is ready.
+
 ### Redis
 Optional for:
 - short-lived cache
@@ -132,6 +138,24 @@ Optional for:
 - rate limiting
 
 Redis is not mandatory if it creates complexity without measurable benefit.
+
+## Snapshot lifecycle
+
+The implemented lifecycle is:
+
+```text
+collecting -> collected -> projecting -> ready
+     |            |             |
+     +------------+-------------+-> failed
+```
+
+PostgreSQL serializes transitions and owns a singleton pointer to the active ready snapshot.
+Completing a projection and evaluating active promotion occur in one transaction. Sequence
+ordering prevents an older collection that finishes late from replacing a newer ready
+snapshot. A failed collection or projection never displaces the previous active snapshot.
+
+The graph projection itself, projection verification, retained evidence tables, and retention
+policy are not yet implemented.
 
 ## Service topology
 

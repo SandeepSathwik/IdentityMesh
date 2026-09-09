@@ -3,6 +3,10 @@
 ## M0 — Repository Ready
 Target: Week 2
 
+Status: complete as of 2026-09-09. The repository, CI, local Compose stack, authenticated
+dependency health checks, first migration, accepted persistence ADR, documented setup, and
+validated public Markdown links satisfy the M0 exit criteria.
+
 Deliverables:
 - docs baseline
 - architecture skeleton

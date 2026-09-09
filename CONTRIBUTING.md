@@ -19,7 +19,7 @@ Read:
 - docs/PROJECT_CHARTER.md
 - docs/ARCHITECTURE.md
 - docs/THREAT_MODEL.md
-- AGENTS.md
+- docs/TESTING_STRATEGY.md
 
 ## Contribution flow
 1. select or open an issue
@@ -70,6 +70,18 @@ General expectations:
 
 ## Tests
 A bug fix should include a regression test where practical.
+
+Run the current local quality suite with:
+
+```powershell
+ruff check .
+ruff format --check .
+mypy
+pytest --cov --cov-report=term-missing
+```
+
+PostgreSQL snapshot integration tests run when `IDENTITYMESH_TEST_POSTGRES_DSN` points to a
+dedicated migrated test database. CI provisions this database and runs the complete suite.
 
 A security rule should include:
 - positive

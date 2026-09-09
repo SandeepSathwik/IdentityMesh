@@ -1,50 +1,32 @@
-# Documentation File Manifest
+# Repository File Manifest
 
-This pack contains the following repository-ready Markdown files:
+This manifest summarizes the current public repository structure. It is descriptive, not an
+architectural constraint; use `git ls-files` for the authoritative file list.
 
-- `.github/ISSUE_TEMPLATE/bug.md`
-- `.github/ISSUE_TEMPLATE/feature.md`
-- `.github/ISSUE_TEMPLATE/security-improvement.md`
-- `.github/PULL_REQUEST_TEMPLATE.md`
-- `AGENTS.md`
-- `CODE_OF_CONDUCT.md`
-- `CONTRIBUTING.md`
-- `README.md`
-- `SECURITY.md`
-- `START_HERE.md`
-- `docs/AGENT_IDENTITY_MODEL.md`
-- `docs/API_GUIDELINES.md`
-- `docs/ARCHITECTURE.md`
-- `docs/ATTACK_PATH_ENGINE.md`
-- `docs/BACKLOG.md`
-- `docs/COST_AND_ENVIRONMENT.md`
-- `docs/DATA_MODEL.md`
-- `docs/DECISION_LOG.md`
-- `docs/DEFINITION_OF_DONE.md`
-- `docs/DEMO_PLAN.md`
-- `docs/DEVELOPMENT.md`
-- `docs/ENGINEERING_AUTONOMY.md`
-- `docs/FAILURE_MODES.md`
-- `docs/GOVERNANCE.md`
-- `docs/IMPLEMENTATION_STRATEGY.md`
-- `docs/INTEGRATION_CONTRACTS.md`
-- `docs/LABS.md`
-- `docs/METRICS.md`
-- `docs/MILESTONES.md`
-- `docs/OBSERVABILITY.md`
-- `docs/OPEN_QUESTIONS.md`
-- `docs/POLICY_ENGINE.md`
-- `docs/PRD.md`
-- `docs/PROJECT_CHARTER.md`
-- `docs/RELEASE_PROCESS.md`
-- `docs/REQUIREMENTS.md`
-- `docs/RISK_MODEL.md`
-- `docs/ROADMAP.md`
-- `docs/SCOPE.md`
-- `docs/SECURE_CODING.md`
-- `docs/SECURITY_REVIEW_CHECKLIST.md`
-- `docs/STYLE_GUIDE.md`
-- `docs/TESTING_STRATEGY.md`
-- `docs/THREAT_MODEL.md`
-- `docs/adr/0000-template.md`
-- `docs/adr/README.md`
+## Application and tests
+
+- `src/identitymesh/` — API, configuration, dependency health, snapshots, and collectors
+- `tests/` — unit and PostgreSQL integration tests
+- `migrations/` — Alembic environment and schema revisions
+
+## Runtime and tooling
+
+- `compose.yaml` — loopback-bound local PostgreSQL, Neo4j, migration, and API services
+- `Dockerfile` — application image
+- `pyproject.toml` — package metadata and tool configuration
+- `requirements.lock` — reproducible Python dependency set
+- `.env.example` — non-secret configuration template
+- `.github/workflows/ci.yml` — Python quality and PostgreSQL integration workflow
+
+## Public project documentation
+
+- `README.md` — project overview, current status, and quick start
+- `CONTRIBUTING.md` — contribution and validation expectations
+- `SECURITY.md` — vulnerability reporting policy
+- `CODE_OF_CONDUCT.md` — community conduct
+- `docs/` — product, architecture, security, testing, development, and planning references
+- `docs/adr/` — accepted and proposed architecture decision records
+- `.github/ISSUE_TEMPLATE/` and `.github/PULL_REQUEST_TEMPLATE.md` — contribution templates
+
+Local-only workspace guidance and intentionally untracked material are excluded from this
+public manifest.

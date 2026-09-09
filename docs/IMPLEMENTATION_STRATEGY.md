@@ -14,7 +14,11 @@ Prove:
 - database connections work
 - CI works
 - configuration is validated
-- basic health dashboard works
+- authenticated dependency health checks work
+
+Status: the service, configuration, PostgreSQL/Neo4j readiness, migration gate, CI baseline,
+and snapshot lifecycle foundation are implemented. A visual health dashboard has not been
+built and is not required to begin Slice 1.
 
 ## Slice 1 — One AWS role end to end
 Implement enough to:
@@ -26,6 +30,10 @@ Implement enough to:
 6. render in UI
 
 Then expand entity coverage.
+
+Status: read-only, paginated AWS IAM role collection and its validated evidence contract are
+implemented. Normalization, persistence of role evidence, graph projection, API exposure, and
+UI rendering remain before this slice is complete.
 
 ## Slice 2 — One attack path
 Create a controlled AWS path and detect it.

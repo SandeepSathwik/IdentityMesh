@@ -41,6 +41,16 @@ Examples:
 - event pipeline + test sink
 - collector + mocked provider
 
+Current coverage includes real PostgreSQL integration tests for snapshot transitions,
+concurrent promotion, rollback behavior, and preservation of the prior active snapshot. These
+tests are skipped locally when an isolated test DSN is not provided; CI provisions and
+migrates PostgreSQL for every supported Python version.
+
+The AWS IAM role collector is tested through its provider protocol with synthetic STS and IAM
+responses. Tests cover pagination, complete-empty results, later-page failure, access denial,
+authentication failure, throttling, connection failure, malformed responses, provenance, and
+schema validation without requiring cloud credentials.
+
 ### End-to-end tests
 Reference scenarios:
 - discovery -> graph -> finding
@@ -109,6 +119,10 @@ Every PR should run:
 - unit tests
 - fast integration tests
 - dependency/security checks
+
+The current CI baseline runs formatting, linting, strict type checking, Alembic migration, and
+the test suite with coverage on Python 3.10 and 3.12. Automated dependency and security
+scanning remain backlog items and must not be represented as already present.
 
 Security-critical PRs should additionally run:
 - policy tests

@@ -187,6 +187,32 @@ At minimum support:
 
 Future versions may model historical changes and time-based attack paths.
 
+### Implemented snapshot lifecycle
+
+PostgreSQL currently stores authoritative snapshot control records with:
+
+- UUID snapshot identity and monotonic sequence identity
+- `collecting`, `collected`, `projecting`, `ready`, and `failed` states
+- collector and projection versions
+- lifecycle timestamps
+- a machine-readable failure code
+- a singleton active-snapshot reference
+
+Only legal forward transitions are accepted. Snapshot promotion is atomic, and only the newest
+completed projection may become active. This lifecycle does not yet imply that provider
+evidence or Neo4j projections are persisted.
+
+### Implemented AWS IAM role evidence
+
+The first provider contract is versioned as `aws.iam.role/v1`. It records observed AWS role
+facts: snapshot and source identifiers, account and collector principal, collection and role
+timestamps, collector version, role identity, path, trust-policy document, optional
+description, session duration, permissions boundary, tags, and last-used metadata.
+
+The attempt envelope, `aws.iam.role.collection/v1`, records `complete`, `partial`, or `failed`
+status plus bounded collection gaps. This is provider evidence, not yet the normalized
+`Principal` model and not an assertion of effective permission or assumability.
+
 ## Schema evolution
 - avoid exposing database schema directly as public API
 - use migration tooling
@@ -200,7 +226,7 @@ Coding agents may propose:
 - SQL schema
 - Neo4j labels
 - edge metadata
-- snapshot representation
+- provider evidence persistence
 - event envelope
 - graph projection strategy
 

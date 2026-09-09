@@ -53,6 +53,10 @@ Start the API, PostgreSQL, and Neo4j:
 docker compose up --build --detach --wait
 ```
 
+Compose runs Alembic migrations in a one-shot `migrate` service. The API starts only after
+that service succeeds and Neo4j is healthy. A migration failure therefore prevents startup
+instead of allowing the application to run against an incompatible schema.
+
 The services bind only to the local loopback interface:
 
 - API: `http://127.0.0.1:8000`
@@ -65,6 +69,42 @@ Verify authenticated dependency readiness:
 ```powershell
 Invoke-RestMethod http://127.0.0.1:8000/health/ready
 ```
+
+`/health/live` reports process liveness. `/health/ready` performs authenticated dependency
+probes and returns `503` when PostgreSQL or Neo4j is unavailable; neither endpoint returns
+connection strings or credentials.
+
+## Migrations
+
+With `IDENTITYMESH_POSTGRES_DSN` set for the target database:
+
+```powershell
+alembic --config pyproject.toml upgrade head
+```
+
+Review every generated or hand-written migration. In particular, verify constraints,
+downgrade consequences, locking behavior, and compatibility with retained snapshots.
+
+## Quality checks
+
+```powershell
+ruff check .
+ruff format --check .
+mypy
+pytest --cov --cov-report=term-missing
+```
+
+Snapshot persistence tests require an isolated PostgreSQL database whose schema has been
+migrated to `head`:
+
+```powershell
+$env:IDENTITYMESH_TEST_POSTGRES_DSN = 'postgresql://user:password@127.0.0.1:5432/identitymesh_test'
+alembic --config pyproject.toml upgrade head
+pytest --cov --cov-report=term-missing
+```
+
+Do not point the test variable at a database containing data that must be retained. AWS
+collector tests use synthetic protocol-backed responses and require no cloud credentials.
 
 Stop the services while retaining local database volumes:
 

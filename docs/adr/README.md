@@ -22,10 +22,14 @@ Use ADRs for decisions that:
 - Rejected
 - Deprecated
 
-## Suggested first ADRs
-- 0001 repository architecture
-- 0002 normalized identity model
-- 0003 graph database choice
-- 0004 policy engine choice
-- 0005 runtime gateway deployment model
-- 0006 delegation representation
+## Register
+
+- [ADR-0001: Persistence ownership and snapshot projection](0001-persistence-and-snapshot-projection.md) — Accepted
+
+## Expected next ADRs
+
+- normalized identity and provenance model
+- graph labels, relationship semantics, and projection validation
+- policy engine integration and policy precedence
+- runtime gateway deployment and failure model
+- delegation representation and validation

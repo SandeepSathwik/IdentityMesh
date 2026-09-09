@@ -4,10 +4,50 @@
 
 IdentityMesh is an open-source security platform for discovering identities, modeling effective privilege, identifying attack paths, evaluating delegated authority, and enforcing runtime authorization across cloud, Kubernetes, and agentic environments.
 
-> Status: Project blueprint / pre-alpha  
+> Status: Pre-alpha / active implementation
 > Initial platform focus: AWS + Kubernetes + AI agents/MCP  
 > Primary language: Python  
 > Intended maturity: production-quality open-source portfolio project, not a tutorial or demo
+
+## Current implementation
+
+The repository currently provides the M0 platform foundation and the first bounded AWS
+collector capability:
+
+- FastAPI service with liveness and authenticated PostgreSQL/Neo4j readiness checks
+- validated environment-based configuration and structured request/error handling
+- PostgreSQL-owned snapshot lifecycle with atomic active-snapshot promotion
+- Neo4j reserved as a rebuildable graph projection, as recorded in ADR-0001
+- Alembic migrations applied before the API starts in Docker Compose
+- read-only AWS IAM role collection using STS identity verification and paginated `ListRoles`
+- explicit `complete`, `partial`, and `failed` collection results with safe reason codes
+- deterministic unit tests and PostgreSQL integration tests in CI on Python 3.10 and 3.12
+
+Normalization, graph projection, attack-path analysis, the dashboard, and runtime
+authorization remain planned work. The collector is not yet exposed through the API or
+connected to snapshot persistence.
+
+## Local development
+
+Requirements: Python 3.10 or newer, Docker, and Docker Compose.
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.lock
+.\.venv\Scripts\python.exe -m pip install --no-deps -e .
+Copy-Item .env.example .env
+docker compose up --build --detach --wait
+```
+
+Set unique local-only values for `POSTGRES_PASSWORD` and `NEO4J_PASSWORD` in `.env` before
+starting the stack. The API is available at `http://127.0.0.1:8000`; verify it with:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:8000/health/live
+Invoke-RestMethod http://127.0.0.1:8000/health/ready
+```
+
+See the [Development Guide](docs/DEVELOPMENT.md) for migrations, tests, and teardown.
 
 ---
 
@@ -193,7 +233,6 @@ V1 prioritizes depth over breadth.
 - [System Requirements](docs/REQUIREMENTS.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Data Model](docs/DATA_MODEL.md)
-- [Agent Identity Model](docs/AGENT_IDENTITY_MODEL.md)
 - [Attack Path Engine](docs/ATTACK_PATH_ENGINE.md)
 - [Policy Engine](docs/POLICY_ENGINE.md)
 - [Risk Model](docs/RISK_MODEL.md)
@@ -202,7 +241,6 @@ V1 prioritizes depth over breadth.
 - [Observability](docs/OBSERVABILITY.md)
 - [Security Labs](docs/LABS.md)
 - [Development Guide](docs/DEVELOPMENT.md)
-- [AI Coding Agent Guide](AGENTS.md)
 - [Roadmap](docs/ROADMAP.md)
 - [Milestones](docs/MILESTONES.md)
 - [Backlog](docs/BACKLOG.md)
@@ -259,7 +297,6 @@ identitymesh/
 ├── docs/
 ├── examples/
 ├── scripts/
-├── AGENTS.md
 ├── CONTRIBUTING.md
 ├── SECURITY.md
 └── README.md

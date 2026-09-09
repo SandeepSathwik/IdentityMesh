@@ -2,44 +2,47 @@
 
 This is a seed backlog, not a commitment to exact implementation order.
 
+Legend: `[x]` implemented, `[~]` partially implemented, `[ ]` not yet implemented. Completion
+here describes repository capability, not a release commitment.
+
 ## Epic A — Repository and Platform Foundation
-- initialize Python project
-- create local Docker environment
-- create API skeleton
-- create dashboard skeleton
-- connect PostgreSQL
-- connect Neo4j
-- add migrations
-- add health endpoints
-- add structured logging
-- add CI
-- add security scanning
-- add configuration validation
+- [x] initialize Python project
+- [x] create local Docker environment
+- [x] create API skeleton
+- [ ] create dashboard skeleton
+- [x] connect PostgreSQL
+- [x] connect Neo4j
+- [x] add migrations
+- [x] add health endpoints
+- [~] add structured logging
+- [x] add CI
+- [ ] add security scanning
+- [x] add configuration validation
 
 ## Epic B — Domain Model
-- define principal model
-- define resource model
-- define policy model
-- define credential metadata
-- define provenance model
-- define graph relationship vocabulary
-- define snapshot model
-- define event envelope
+- [ ] define principal model
+- [ ] define resource model
+- [ ] define policy model
+- [ ] define credential metadata
+- [~] define provenance model
+- [ ] define graph relationship vocabulary
+- [x] define snapshot lifecycle model
+- [ ] define event envelope
 
 ## Epic C — AWS Collector
-- AWS connection configuration
-- STS identity verification
-- list users
-- list groups
-- list roles
-- managed policies
-- inline policies
-- trust policies
-- OIDC providers
-- pagination
-- rate-limit handling
-- partial permission reporting
-- mocked test fixtures
+- [~] AWS connection configuration
+- [x] STS identity verification
+- [ ] list users
+- [ ] list groups
+- [x] list roles
+- [ ] managed policies
+- [ ] inline policies
+- [~] trust policies (raw role trust-policy evidence only)
+- [ ] OIDC providers
+- [x] pagination
+- [x] rate-limit handling
+- [x] partial permission reporting
+- [x] synthetic test fixtures
 
 ## Epic D — Graph
 - node persistence
