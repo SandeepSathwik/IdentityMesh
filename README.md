@@ -21,11 +21,12 @@ collector capability:
 - Alembic migrations applied before the API starts in Docker Compose
 - read-only AWS IAM role collection using STS identity verification and paginated `ListRoles`
 - explicit `complete`, `partial`, and `failed` collection results with safe reason codes
+- provider-neutral AWS role normalization with deterministic identity and observed provenance
 - deterministic unit tests and PostgreSQL integration tests in CI on Python 3.10 and 3.12
 
-Normalization, graph projection, attack-path analysis, the dashboard, and runtime
-authorization remain planned work. The collector is not yet exposed through the API or
-connected to snapshot persistence.
+Evidence persistence, graph projection, attack-path analysis, the dashboard, and runtime
+authorization remain planned work. The collector and normalizer are not yet exposed through
+the API or connected to snapshot persistence.
 
 ## Local development
 

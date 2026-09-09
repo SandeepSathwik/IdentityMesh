@@ -20,7 +20,7 @@ here describes repository capability, not a release commitment.
 - [x] add configuration validation
 
 ## Epic B — Domain Model
-- [ ] define principal model
+- [x] define principal model (v1 AWS role slice)
 - [ ] define resource model
 - [ ] define policy model
 - [ ] define credential metadata

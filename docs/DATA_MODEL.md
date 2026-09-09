@@ -210,8 +210,23 @@ timestamps, collector version, role identity, path, trust-policy document, optio
 description, session duration, permissions boundary, tags, and last-used metadata.
 
 The attempt envelope, `aws.iam.role.collection/v1`, records `complete`, `partial`, or `failed`
-status plus bounded collection gaps. This is provider evidence, not yet the normalized
-`Principal` model and not an assertion of effective permission or assumability.
+status plus bounded collection gaps. This is provider evidence and not an assertion of
+effective permission or assumability.
+
+### Implemented normalized AWS role principal
+
+Validated AWS role evidence can be normalized into the versioned
+`identitymesh.principal/v1` contract. AWS roles are classified as `cloud_role` principals.
+Their deterministic internal UUID is derived from the provider, AWS account ID, and immutable
+AWS role ID. New collection snapshots therefore preserve identity, while deleting and
+recreating a role at the same ARN produces a different principal rather than silently aliasing
+the old role.
+
+The normalized record retains source ARN, snapshot, collection time, collector version,
+collector principal, and evidence schema as observed provenance. Provider fields that do not
+belong in the principal contract, including trust-policy and permissions-boundary data, are
+reported as deferred fields and remain in the provider evidence. Normalization does not assert
+that any principal can assume the role and does not compute effective permissions.
 
 ## Schema evolution
 - avoid exposing database schema directly as public API
