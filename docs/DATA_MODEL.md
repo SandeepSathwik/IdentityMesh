@@ -228,6 +228,19 @@ belong in the principal contract, including trust-policy and permissions-boundar
 reported as deferred fields and remain in the provider evidence. Normalization does not assert
 that any principal can assume the role and does not compute effective permissions.
 
+### Implemented evidence persistence
+
+PostgreSQL atomically retains each AWS role collection attempt, its bounded gaps, validated
+provider evidence, and the corresponding normalized principals. A canonical content digest
+makes an identical retry idempotent; reusing a snapshot for different content is rejected.
+Database constraints bind principals to evidence from the same provider and snapshot and
+enforce collection-status count semantics.
+
+Persistence is allowed only while a snapshot is `collecting` and only when the snapshot's
+collector version matches the AWS role collector contract. Persistence does not transition,
+project, or activate the snapshot. Partial and failed attempts therefore remain inspectable
+without silently replacing the prior active snapshot.
+
 ## Schema evolution
 - avoid exposing database schema directly as public API
 - use migration tooling

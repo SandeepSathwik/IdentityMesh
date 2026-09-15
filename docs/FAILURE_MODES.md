@@ -23,12 +23,19 @@ If no valid roles remain after an IAM failure, the attempt is `failed`, not `par
 successful empty response is `complete`; it is not interchangeable with unavailable data.
 
 Collector attempt status and persisted snapshot status are separate concepts. The integration
-that maps collection results into snapshot transitions has not yet been implemented.
+that maps collection results into snapshot transitions has not yet been implemented. Stored
+partial and failed attempts do not transition or activate their snapshots.
 
 The AWS role normalizer accepts only validated role evidence. It preserves source provenance,
 does not convert trust-policy text into an access conclusion, and reports provider fields
 deferred from the principal contract. Invalid or unavailable provider data must not produce a
 normalized principal.
+
+Persistence uses one PostgreSQL transaction for the collection attempt, gaps, evidence, and
+principals. A constraint failure rolls back all writes. Exact retries are idempotent; a retry
+with different content for the same snapshot returns
+`COLLECTION_PERSISTENCE_CONFLICT`. Evidence cannot be written to a missing, non-collecting, or
+collector-version-mismatched snapshot.
 
 ## Kubernetes unavailable
 Same general pattern as provider failure.

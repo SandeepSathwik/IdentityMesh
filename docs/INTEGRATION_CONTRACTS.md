@@ -48,8 +48,13 @@ Normalizer must:
 The first implemented normalizer maps `AwsRoleEvidence` into
 `identitymesh.principal/v1`. It uses the AWS account ID and immutable role ID to derive a
 stable internal UUID, preserves observed source provenance, and reports evidence fields
-deferred from the principal contract. Collection orchestration and persistence wiring are not
-yet implemented.
+deferred from the principal contract.
+
+The AWS role persistence boundary stores the collection attempt, gaps, provider evidence, and
+normalized principals in one PostgreSQL transaction. Identical retries are idempotent by a
+canonical content digest; conflicting retries fail with a stable reason code. Persistence
+requires a matching `collecting` snapshot but deliberately does not perform the lifecycle
+transition. Collection orchestration is not yet implemented.
 
 ## Normalizer -> Graph
 Graph input should contain:

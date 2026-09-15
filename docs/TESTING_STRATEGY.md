@@ -55,6 +55,11 @@ The AWS role normalizer has deterministic contract tests for observed provenance
 identity across snapshots, distinct identity after role recreation, explicit deferred fields,
 rejection of unvalidated input, and timezone validation.
 
+PostgreSQL integration tests cover atomic evidence/principal persistence, complete-empty and
+failed absence semantics, partial collection visibility without activation, exact-retry
+idempotency under sequential and concurrent retries, conflicting retries, collector-version
+mismatch, invalid snapshot state, and rollback on duplicate provider identity.
+
 ### End-to-end tests
 Reference scenarios:
 - discovery -> graph -> finding

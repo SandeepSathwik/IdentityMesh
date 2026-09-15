@@ -94,8 +94,8 @@ mypy
 pytest --cov --cov-report=term-missing
 ```
 
-Snapshot persistence tests require an isolated PostgreSQL database whose schema has been
-migrated to `head`:
+Snapshot and evidence persistence tests require an isolated PostgreSQL database whose schema
+has been migrated to `head`:
 
 ```powershell
 $env:IDENTITYMESH_TEST_POSTGRES_DSN = 'postgresql://user:password@127.0.0.1:5432/identitymesh_test'

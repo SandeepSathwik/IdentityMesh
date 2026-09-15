@@ -114,6 +114,9 @@ projections. They are not co-equal sources of truth.
 ### PostgreSQL
 Good fit for:
 - configuration
+- provider collection attempts and gaps
+- validated provider evidence
+- normalized principals by snapshot
 - policies metadata
 - users
 - agent registry
@@ -160,8 +163,9 @@ Completing a projection and evaluating active promotion occur in one transaction
 ordering prevents an older collection that finishes late from replacing a newer ready
 snapshot. A failed collection or projection never displaces the previous active snapshot.
 
-The graph projection itself, projection verification, retained evidence tables, and retention
-policy are not yet implemented.
+AWS role collection attempts, gaps, provider evidence, and normalized principals are retained
+transactionally in PostgreSQL. The graph projection itself, projection verification,
+collection orchestration, and retention policy are not yet implemented.
 
 ## Service topology
 

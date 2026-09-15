@@ -43,9 +43,10 @@ here describes repository capability, not a release commitment.
 - [x] rate-limit handling
 - [x] partial permission reporting
 - [x] synthetic test fixtures
+- [x] persist role attempts, gaps, evidence, and normalized principals
 
 ## Epic D — Graph
-- node persistence
+- [~] node persistence (normalized principals retained in PostgreSQL; graph projection pending)
 - edge persistence
 - provenance
 - snapshot import

@@ -128,6 +128,18 @@ class AwsRoleCollection(BaseModel):
             raise ValueError("partial collection requires identity and collection gaps")
         if self.status is CollectionStatus.FAILED and (self.roles or not self.gaps):
             raise ValueError("failed collection requires gaps and cannot contain roles")
+        source_ids: set[str] = set()
+        for role in self.roles:
+            if (
+                role.snapshot_id != self.snapshot_id
+                or role.collected_at != self.collected_at
+                or role.account_id != self.account_id
+                or role.collector_principal_arn != self.collector_principal_arn
+            ):
+                raise ValueError("role evidence must match its collection envelope")
+            if role.source_id in source_ids:
+                raise ValueError("collection cannot contain duplicate role source identifiers")
+            source_ids.add(role.source_id)
         return self
 
 

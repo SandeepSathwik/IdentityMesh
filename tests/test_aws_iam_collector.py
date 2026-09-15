@@ -217,6 +217,39 @@ def test_collection_model_rejects_complete_status_with_a_gap() -> None:
         )
 
 
+def test_collection_model_rejects_role_from_another_snapshot() -> None:
+    result = AwsIamRoleCollector(FakeAwsIamApi([{"Roles": [_role()]}]), clock=lambda: NOW).collect(
+        uuid4()
+    )
+    mismatched = result.roles[0].model_copy(update={"snapshot_id": uuid4()})
+
+    with pytest.raises(ValidationError, match="match its collection envelope"):
+        AwsRoleCollection(
+            snapshot_id=result.snapshot_id,
+            collected_at=result.collected_at,
+            status=result.status,
+            account_id=result.account_id,
+            collector_principal_arn=result.collector_principal_arn,
+            roles=(mismatched,),
+        )
+
+
+def test_collection_model_rejects_duplicate_role_source_identifiers() -> None:
+    result = AwsIamRoleCollector(FakeAwsIamApi([{"Roles": [_role()]}]), clock=lambda: NOW).collect(
+        uuid4()
+    )
+
+    with pytest.raises(ValidationError, match="duplicate role source identifiers"):
+        AwsRoleCollection(
+            snapshot_id=result.snapshot_id,
+            collected_at=result.collected_at,
+            status=result.status,
+            account_id=result.account_id,
+            collector_principal_arn=result.collector_principal_arn,
+            roles=(result.roles[0], result.roles[0]),
+        )
+
+
 class FakePaginator:
     def paginate(self) -> Iterator[Mapping[str, object]]:
         yield {"Roles": []}
