@@ -44,6 +44,7 @@ here describes repository capability, not a release commitment.
 - [x] partial permission reporting
 - [x] synthetic test fixtures
 - [x] persist role attempts, gaps, evidence, and normalized principals
+- [x] orchestrate role collection and finalize snapshot lifecycle
 
 ## Epic D — Graph
 - [~] node persistence (normalized principals retained in PostgreSQL; graph projection pending)

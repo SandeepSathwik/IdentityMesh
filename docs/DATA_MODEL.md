@@ -199,8 +199,8 @@ PostgreSQL currently stores authoritative snapshot control records with:
 - a singleton active-snapshot reference
 
 Only legal forward transitions are accepted. Snapshot promotion is atomic, and only the newest
-completed projection may become active. This lifecycle does not yet imply that provider
-evidence or Neo4j projections are persisted.
+completed projection may become active. AWS role evidence now drives the collection-stage
+transition, while Neo4j projection remains unimplemented.
 
 ### Implemented AWS IAM role evidence
 
@@ -237,9 +237,11 @@ Database constraints bind principals to evidence from the same provider and snap
 enforce collection-status count semantics.
 
 Persistence is allowed only while a snapshot is `collecting` and only when the snapshot's
-collector version matches the AWS role collector contract. Persistence does not transition,
-project, or activate the snapshot. Partial and failed attempts therefore remain inspectable
-without silently replacing the prior active snapshot.
+collector version matches the AWS role collector contract. The orchestrated boundary writes
+the attempt and evidence and finalizes collection in one transaction: `complete` advances the
+snapshot to `collected`, while `partial` and `failed` end it in `failed` with stable reason
+codes. None of these transitions project or activate the snapshot, so incomplete evidence
+remains inspectable without silently replacing the prior active snapshot.
 
 ## Schema evolution
 - avoid exposing database schema directly as public API

@@ -58,7 +58,10 @@ rejection of unvalidated input, and timezone validation.
 PostgreSQL integration tests cover atomic evidence/principal persistence, complete-empty and
 failed absence semantics, partial collection visibility without activation, exact-retry
 idempotency under sequential and concurrent retries, conflicting retries, collector-version
-mismatch, invalid snapshot state, and rollback on duplicate provider identity.
+mismatch, invalid snapshot state, and rollback on duplicate provider identity. Orchestration
+tests additionally cover off-event-loop provider execution, atomic collection finalization,
+concurrent finalization, failure-code mapping, malformed collector output, and preservation of
+the prior active snapshot across partial, failed, and unexpected collection outcomes.
 
 ### End-to-end tests
 Reference scenarios:

@@ -164,8 +164,12 @@ ordering prevents an older collection that finishes late from replacing a newer 
 snapshot. A failed collection or projection never displaces the previous active snapshot.
 
 AWS role collection attempts, gaps, provider evidence, and normalized principals are retained
-transactionally in PostgreSQL. The graph projection itself, projection verification,
-collection orchestration, and retention policy are not yet implemented.
+transactionally in PostgreSQL. The collection service creates the snapshot, runs the
+synchronous provider client outside the event loop, and atomically persists evidence while
+finalizing the snapshot. Complete collection advances to `collected`; partial, failed, and
+unexpected collection failures end in `failed` without changing the active snapshot. The
+graph projection itself, projection verification, API or scheduled collection trigger, and
+retention policy are not yet implemented.
 
 ## Service topology
 

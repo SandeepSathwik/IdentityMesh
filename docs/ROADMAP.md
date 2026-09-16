@@ -18,8 +18,9 @@ Phase 0 is substantially complete: the repository, local service stack, CI basel
 configuration validation, health checks, persistence decision, migrations, and snapshot
 lifecycle are in place. The first Phase 1 increments collect AWS IAM roles and normalize them
 into provider-neutral principals with observed provenance. PostgreSQL atomically retains the
-collection attempts, gaps, evidence, and principals. Collection orchestration, graph
-projection, the API, and the dashboard remain.
+collection attempts, gaps, evidence, and principals, and internal orchestration finalizes each
+collection snapshot without allowing incomplete evidence to become active. Graph projection,
+an API or scheduled trigger, and the dashboard remain.
 
 This status note does not change the phase outcomes or expand V1 scope.
 

@@ -26,8 +26,8 @@ Target: End Month 2
 Release: v0.1
 
 Status: in progress. AWS IAM role collection, role-to-principal normalization, and atomic
-PostgreSQL evidence/principal persistence are complete. Collection orchestration, graph import,
-API inspection, dashboard rendering, and broader AWS identity coverage remain.
+PostgreSQL evidence/principal persistence with collection lifecycle orchestration are complete.
+Graph import, API inspection, dashboard rendering, and broader AWS identity coverage remain.
 
 Deliverables:
 - AWS collector

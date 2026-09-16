@@ -41,13 +41,15 @@ fails, the prior ready snapshot remains active and its staleness remains visible
 No distributed transaction is introduced. Domain tables, retention periods, and projection
 implementation details remain deferred until representative AWS evidence is available.
 
-### Implementation update — 2026-09-15
+### Implementation update — 2026-09-16
 
 Representative AWS IAM role evidence is now stored in PostgreSQL. One transaction persists an
 AWS collection attempt, its gaps, provider evidence, and normalized principals. A canonical
 content digest makes exact retries idempotent and rejects conflicting reuse of a snapshot.
-Persistence is restricted to a matching `collecting` snapshot and does not advance lifecycle
-state or active promotion. Retention periods and graph projection details remain deferred.
+Persistence is restricted to a matching `collecting` snapshot. The collection orchestration
+boundary atomically writes evidence and advances complete attempts to `collected`; partial and
+failed attempts become terminal `failed` snapshots. No collection-stage result performs active
+promotion. Retention periods and graph projection details remain deferred.
 
 ## Consequences
 

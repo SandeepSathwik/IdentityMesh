@@ -211,6 +211,88 @@ async def test_concurrent_identical_retries_create_one_collection(
 
 
 @pytest.mark.anyio
+async def test_complete_collection_is_persisted_and_finalized_atomically(
+    persistence: tuple[SnapshotStore, AwsIamRoleEvidenceStore, asyncpg.Pool],
+) -> None:
+    snapshots, evidence_store, pool = persistence
+    snapshot = await snapshots.create(COLLECTOR_VERSION)
+    collection = _collection(snapshot.snapshot_id)
+
+    first = await evidence_store.persist_and_finalize(collection)
+    retry = await evidence_store.persist_and_finalize(collection)
+
+    assert first.created is True
+    assert first.snapshot_status is SnapshotStatus.COLLECTED
+    assert first.failure_code is None
+    assert retry.created is False
+    assert retry.snapshot_status is SnapshotStatus.COLLECTED
+    async with pool.acquire() as connection:
+        state = await connection.fetchrow(
+            "SELECT status, collected_at, failure_code FROM snapshots WHERE snapshot_id = $1",
+            snapshot.snapshot_id,
+        )
+    assert state["status"] == SnapshotStatus.COLLECTED.value
+    assert state["collected_at"] is not None
+    assert state["failure_code"] is None
+
+
+@pytest.mark.anyio
+@pytest.mark.parametrize(
+    ("collection_status", "failure_code"),
+    [
+        (CollectionStatus.PARTIAL, "AWS_COLLECTION_PARTIAL"),
+        (CollectionStatus.FAILED, "AWS_COLLECTION_FAILED"),
+    ],
+)
+async def test_incomplete_collection_is_persisted_as_terminal_failure(
+    persistence: tuple[SnapshotStore, AwsIamRoleEvidenceStore, asyncpg.Pool],
+    collection_status: CollectionStatus,
+    failure_code: str,
+) -> None:
+    snapshots, evidence_store, pool = persistence
+    snapshot = await snapshots.create(COLLECTOR_VERSION)
+    partial = collection_status is CollectionStatus.PARTIAL
+    collection = _collection(
+        snapshot.snapshot_id,
+        status=collection_status,
+        roles=(_role(snapshot.snapshot_id),) if partial else (),
+        gaps=(_gap(),),
+        account_id=ACCOUNT_ID if partial else None,
+        collector_principal_arn=CALLER_ARN if partial else None,
+    )
+
+    result = await evidence_store.persist_and_finalize(collection)
+
+    assert result.snapshot_status is SnapshotStatus.FAILED
+    assert result.failure_code == failure_code
+    async with pool.acquire() as connection:
+        state = await connection.fetchrow(
+            "SELECT status, failed_at, failure_code FROM snapshots WHERE snapshot_id = $1",
+            snapshot.snapshot_id,
+        )
+    assert state["status"] == SnapshotStatus.FAILED.value
+    assert state["failed_at"] is not None
+    assert state["failure_code"] == failure_code
+
+
+@pytest.mark.anyio
+async def test_concurrent_finalization_is_idempotent(
+    persistence: tuple[SnapshotStore, AwsIamRoleEvidenceStore, asyncpg.Pool],
+) -> None:
+    snapshots, evidence_store, _ = persistence
+    snapshot = await snapshots.create(COLLECTOR_VERSION)
+    collection = _collection(snapshot.snapshot_id)
+
+    results = await asyncio.gather(
+        evidence_store.persist_and_finalize(collection),
+        evidence_store.persist_and_finalize(collection),
+    )
+
+    assert sorted(result.created for result in results) == [False, True]
+    assert all(result.snapshot_status is SnapshotStatus.COLLECTED for result in results)
+
+
+@pytest.mark.anyio
 async def test_conflicting_retry_preserves_original_collection(
     persistence: tuple[SnapshotStore, AwsIamRoleEvidenceStore, asyncpg.Pool],
 ) -> None:

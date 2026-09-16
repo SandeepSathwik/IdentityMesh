@@ -22,12 +22,14 @@ collector capability:
 - read-only AWS IAM role collection using STS identity verification and paginated `ListRoles`
 - explicit `complete`, `partial`, and `failed` collection results with safe reason codes
 - provider-neutral AWS role normalization with deterministic identity and observed provenance
-- atomic PostgreSQL persistence for AWS role attempts, gaps, evidence, and normalized principals
+- collection orchestration that runs the synchronous provider client off the event loop
+- atomic PostgreSQL persistence and lifecycle finalization for AWS role evidence
 - deterministic unit tests and PostgreSQL integration tests in CI on Python 3.10 and 3.12
 
-Collection orchestration, graph projection, attack-path analysis, the dashboard, and runtime
-authorization remain planned work. Persisting evidence does not transition or activate its
-snapshot, and the collector pipeline is not yet exposed through the API.
+Graph projection, attack-path analysis, the dashboard, and runtime authorization remain
+planned work. The collector pipeline is currently an internal service and is not yet exposed
+through the API or a scheduler. A successful collection reaches `collected`; incomplete or
+failed collection is retained as a terminal failed snapshot and never becomes active.
 
 ## Local development
 

@@ -3,12 +3,14 @@
 import hashlib
 import json
 from dataclasses import dataclass
+from typing import cast
 from uuid import UUID
 
 import asyncpg  # type: ignore[import-untyped]
 
 from identitymesh.collectors.aws_iam import COLLECTOR_VERSION, AwsRoleCollection, CollectionStatus
 from identitymesh.normalizers.aws_iam import normalize_aws_role
+from identitymesh.principals import Principal
 from identitymesh.snapshots import SnapshotNotFoundError, SnapshotStatus
 
 
@@ -59,6 +61,8 @@ class PersistedAwsRoleCollection:
     gap_count: int
     principal_count: int
     created: bool
+    snapshot_status: SnapshotStatus
+    failure_code: str | None
 
 
 def _canonical_collection(collection: AwsRoleCollection) -> str:
@@ -81,30 +85,123 @@ class AwsIamRoleEvidenceStore:
         self._pool = pool
 
     async def persist(self, collection: AwsRoleCollection) -> PersistedAwsRoleCollection:
-        if not isinstance(collection, AwsRoleCollection):
-            raise TypeError("collection must be validated AwsRoleCollection")
+        """Persist evidence without advancing snapshot lifecycle state."""
 
-        normalized = tuple(normalize_aws_role(role).principal for role in collection.roles)
-        digest = _collection_digest(collection)
+        normalized, digest = _prepare_collection(collection)
+        try:
+            async with self._pool.acquire() as connection, connection.transaction():
+                snapshot = await _locked_snapshot(connection, collection.snapshot_id)
+                snapshot_status = SnapshotStatus(snapshot["status"])
+                _require_matching_collector(collection.snapshot_id, snapshot["collector_version"])
+                if snapshot_status is not SnapshotStatus.COLLECTING:
+                    raise SnapshotNotCollectingError(collection.snapshot_id, snapshot_status)
+                created = await _persist_rows(connection, collection, normalized, digest)
+        except asyncpg.IntegrityConstraintViolationError as error:
+            raise CollectionPersistenceConflictError(collection.snapshot_id) from error
+
+        return _result(
+            collection,
+            created=created,
+            snapshot_status=SnapshotStatus.COLLECTING,
+            failure_code=None,
+        )
+
+    async def persist_and_finalize(
+        self,
+        collection: AwsRoleCollection,
+    ) -> PersistedAwsRoleCollection:
+        """Atomically persist evidence and finalize collection lifecycle state."""
+
+        normalized, digest = _prepare_collection(collection)
+        target_status, failure_code = _final_state(collection.status)
 
         try:
             async with self._pool.acquire() as connection, connection.transaction():
-                snapshot = await connection.fetchrow(
-                    "SELECT status, collector_version FROM snapshots "
-                    "WHERE snapshot_id = $1 FOR UPDATE",
-                    collection.snapshot_id,
-                )
-                if snapshot is None:
-                    raise SnapshotNotFoundError(collection.snapshot_id)
-
+                snapshot = await _locked_snapshot(connection, collection.snapshot_id)
                 snapshot_status = SnapshotStatus(snapshot["status"])
+                _require_matching_collector(collection.snapshot_id, snapshot["collector_version"])
+
+                if snapshot_status is target_status:
+                    existing_digest = await _existing_digest(connection, collection.snapshot_id)
+                    if existing_digest != digest or snapshot["failure_code"] != failure_code:
+                        raise CollectionPersistenceConflictError(collection.snapshot_id)
+                    return _result(
+                        collection,
+                        created=False,
+                        snapshot_status=target_status,
+                        failure_code=failure_code,
+                    )
                 if snapshot_status is not SnapshotStatus.COLLECTING:
                     raise SnapshotNotCollectingError(collection.snapshot_id, snapshot_status)
-                if snapshot["collector_version"] != COLLECTOR_VERSION:
-                    raise CollectorVersionMismatchError(collection.snapshot_id)
 
-                inserted = await connection.fetchval(
-                    """
+                created = await _persist_rows(connection, collection, normalized, digest)
+                await _finalize_snapshot(
+                    connection,
+                    collection.snapshot_id,
+                    target_status,
+                    failure_code,
+                )
+        except asyncpg.IntegrityConstraintViolationError as error:
+            raise CollectionPersistenceConflictError(collection.snapshot_id) from error
+
+        return _result(
+            collection,
+            created=created,
+            snapshot_status=target_status,
+            failure_code=failure_code,
+        )
+
+
+def _prepare_collection(collection: AwsRoleCollection) -> tuple[tuple[Principal, ...], str]:
+    if not isinstance(collection, AwsRoleCollection):
+        raise TypeError("collection must be validated AwsRoleCollection")
+
+    normalized = tuple(normalize_aws_role(role).principal for role in collection.roles)
+    return normalized, _collection_digest(collection)
+
+
+async def _locked_snapshot(connection: asyncpg.Connection, snapshot_id: UUID) -> asyncpg.Record:
+    record = await connection.fetchrow(
+        """
+        SELECT status, collector_version, failure_code
+        FROM snapshots
+        WHERE snapshot_id = $1
+        FOR UPDATE
+        """,
+        snapshot_id,
+    )
+    if record is None:
+        raise SnapshotNotFoundError(snapshot_id)
+    return record
+
+
+def _require_matching_collector(snapshot_id: UUID, collector_version: object) -> None:
+    if collector_version != COLLECTOR_VERSION:
+        raise CollectorVersionMismatchError(snapshot_id)
+
+
+async def _existing_digest(connection: asyncpg.Connection, snapshot_id: UUID) -> str | None:
+    return cast(
+        str | None,
+        await connection.fetchval(
+            """
+            SELECT content_sha256
+            FROM aws_iam_role_collection_attempts
+            WHERE snapshot_id = $1
+            """,
+            snapshot_id,
+        ),
+    )
+
+
+async def _persist_rows(
+    connection: asyncpg.Connection,
+    collection: AwsRoleCollection,
+    normalized: tuple[Principal, ...],
+    digest: str,
+) -> bool:
+    inserted = await connection.fetchval(
+        """
                     INSERT INTO aws_iam_role_collection_attempts (
                         snapshot_id, schema_version, collected_at, status, account_id,
                         collector_principal_arn, role_count, gap_count, content_sha256
@@ -113,52 +210,45 @@ class AwsIamRoleEvidenceStore:
                     ON CONFLICT (snapshot_id) DO NOTHING
                     RETURNING TRUE
                     """,
-                    collection.snapshot_id,
-                    collection.schema_version,
-                    collection.collected_at,
-                    collection.status.value,
-                    collection.account_id,
-                    collection.collector_principal_arn,
-                    len(collection.roles),
-                    len(collection.gaps),
-                    digest,
-                )
-                if inserted is None:
-                    existing_digest = await connection.fetchval(
-                        """
-                        SELECT content_sha256
-                        FROM aws_iam_role_collection_attempts
-                        WHERE snapshot_id = $1
-                        """,
-                        collection.snapshot_id,
-                    )
-                    if existing_digest != digest:
-                        raise CollectionPersistenceConflictError(collection.snapshot_id)
-                    return _result(collection, created=False)
+        collection.snapshot_id,
+        collection.schema_version,
+        collection.collected_at,
+        collection.status.value,
+        collection.account_id,
+        collection.collector_principal_arn,
+        len(collection.roles),
+        len(collection.gaps),
+        digest,
+    )
+    if inserted is None:
+        existing_digest = await _existing_digest(connection, collection.snapshot_id)
+        if existing_digest != digest:
+            raise CollectionPersistenceConflictError(collection.snapshot_id)
+        return False
 
-                if collection.gaps:
-                    await connection.executemany(
-                        """
+    if collection.gaps:
+        await connection.executemany(
+            """
                         INSERT INTO aws_iam_role_collection_gaps (
                             snapshot_id, operation, reason_code, retryable, message
                         )
                         VALUES ($1, $2, $3, $4, $5)
                         """,
-                        [
-                            (
-                                collection.snapshot_id,
-                                gap.operation,
-                                gap.reason_code.value,
-                                gap.retryable,
-                                gap.message,
-                            )
-                            for gap in collection.gaps
-                        ],
-                    )
+            [
+                (
+                    collection.snapshot_id,
+                    gap.operation,
+                    gap.reason_code.value,
+                    gap.retryable,
+                    gap.message,
+                )
+                for gap in collection.gaps
+            ],
+        )
 
-                for role, principal in zip(collection.roles, normalized, strict=True):
-                    await connection.execute(
-                        """
+    for role, principal in zip(collection.roles, normalized, strict=True):
+        await connection.execute(
+            """
                         INSERT INTO provider_evidence (
                             snapshot_id, provider, object_type, source_id, schema_version,
                             provider_object_id, collected_at, collector_version,
@@ -166,19 +256,19 @@ class AwsIamRoleEvidenceStore:
                         )
                         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb)
                         """,
-                        collection.snapshot_id,
-                        role.provider,
-                        role.object_type,
-                        role.source_id,
-                        role.schema_version,
-                        role.role_id,
-                        role.collected_at,
-                        role.collector_version,
-                        role.collector_principal_arn,
-                        role.model_dump_json(),
-                    )
-                    await connection.execute(
-                        """
+            collection.snapshot_id,
+            role.provider,
+            role.object_type,
+            role.source_id,
+            role.schema_version,
+            role.role_id,
+            role.collected_at,
+            role.collector_version,
+            role.collector_principal_arn,
+            role.model_dump_json(),
+        )
+        await connection.execute(
+            """
                         INSERT INTO principals (
                             snapshot_id, principal_id, schema_version, provider,
                             principal_type, external_id, display_name,
@@ -186,23 +276,67 @@ class AwsIamRoleEvidenceStore:
                         )
                         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb)
                         """,
-                        collection.snapshot_id,
-                        principal.principal_id,
-                        principal.schema_version,
-                        principal.provider,
-                        principal.principal_type.value,
-                        principal.external_id,
-                        principal.display_name,
-                        principal.provenance.source_object_id,
-                        principal.model_dump_json(),
-                    )
-        except asyncpg.IntegrityConstraintViolationError as error:
-            raise CollectionPersistenceConflictError(collection.snapshot_id) from error
-
-        return _result(collection, created=True)
+            collection.snapshot_id,
+            principal.principal_id,
+            principal.schema_version,
+            principal.provider,
+            principal.principal_type.value,
+            principal.external_id,
+            principal.display_name,
+            principal.provenance.source_object_id,
+            principal.model_dump_json(),
+        )
+    return True
 
 
-def _result(collection: AwsRoleCollection, *, created: bool) -> PersistedAwsRoleCollection:
+def _final_state(status: CollectionStatus) -> tuple[SnapshotStatus, str | None]:
+    if status is CollectionStatus.COMPLETE:
+        return SnapshotStatus.COLLECTED, None
+    if status is CollectionStatus.PARTIAL:
+        return SnapshotStatus.FAILED, "AWS_COLLECTION_PARTIAL"
+    return SnapshotStatus.FAILED, "AWS_COLLECTION_FAILED"
+
+
+async def _finalize_snapshot(
+    connection: asyncpg.Connection,
+    snapshot_id: UUID,
+    target: SnapshotStatus,
+    failure_code: str | None,
+) -> None:
+    if target is SnapshotStatus.COLLECTED:
+        result = await connection.execute(
+            """
+            UPDATE snapshots
+            SET status = $2, collected_at = transaction_timestamp()
+            WHERE snapshot_id = $1 AND status = $3
+            """,
+            snapshot_id,
+            SnapshotStatus.COLLECTED.value,
+            SnapshotStatus.COLLECTING.value,
+        )
+    else:
+        result = await connection.execute(
+            """
+            UPDATE snapshots
+            SET status = $2, failed_at = transaction_timestamp(), failure_code = $3
+            WHERE snapshot_id = $1 AND status = $4
+            """,
+            snapshot_id,
+            SnapshotStatus.FAILED.value,
+            failure_code,
+            SnapshotStatus.COLLECTING.value,
+        )
+    if result != "UPDATE 1":  # pragma: no cover - protected by the locked snapshot row
+        raise RuntimeError("snapshot disappeared during collection finalization")
+
+
+def _result(
+    collection: AwsRoleCollection,
+    *,
+    created: bool,
+    snapshot_status: SnapshotStatus,
+    failure_code: str | None,
+) -> PersistedAwsRoleCollection:
     return PersistedAwsRoleCollection(
         snapshot_id=collection.snapshot_id,
         status=collection.status,
@@ -210,4 +344,6 @@ def _result(collection: AwsRoleCollection, *, created: bool) -> PersistedAwsRole
         gap_count=len(collection.gaps),
         principal_count=len(collection.roles),
         created=created,
+        snapshot_status=snapshot_status,
+        failure_code=failure_code,
     )

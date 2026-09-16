@@ -53,8 +53,10 @@ deferred from the principal contract.
 The AWS role persistence boundary stores the collection attempt, gaps, provider evidence, and
 normalized principals in one PostgreSQL transaction. Identical retries are idempotent by a
 canonical content digest; conflicting retries fail with a stable reason code. Persistence
-requires a matching `collecting` snapshot but deliberately does not perform the lifecycle
-transition. Collection orchestration is not yet implemented.
+requires a matching `collecting` snapshot. The orchestration boundary creates that snapshot,
+runs the synchronous collector outside the event loop, then persists and finalizes collection
+atomically. `complete` maps to `collected`; `partial` and `failed` map to terminal `failed`
+snapshots. The service is not yet connected to an API route or scheduler.
 
 ## Normalizer -> Graph
 Graph input should contain:

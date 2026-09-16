@@ -33,9 +33,10 @@ Then expand entity coverage.
 
 Status: read-only, paginated AWS IAM role collection, its validated evidence contract, and
 provider-neutral role normalization are implemented. PostgreSQL now atomically persists role
-attempts, gaps, evidence, and normalized principals without advancing snapshot state. Collection
-orchestration, graph projection, API exposure, and UI rendering remain before this slice is
-complete.
+attempts, gaps, evidence, and normalized principals and finalizes the collection lifecycle.
+The internal orchestration service runs the blocking provider client off the event loop and
+fails incomplete snapshots closed. Graph projection, API exposure, and UI rendering remain
+before this slice is complete.
 
 ## Slice 2 — One attack path
 Create a controlled AWS path and detect it.

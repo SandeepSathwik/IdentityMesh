@@ -5,8 +5,8 @@ architectural constraint; use `git ls-files` for the authoritative file list.
 
 ## Application and tests
 
-- `src/identitymesh/` — API, configuration, dependency health, snapshots, collectors,
-  provider-neutral principal contracts, and normalizers
+- `src/identitymesh/` — API, configuration, dependency health, snapshots, AWS collection
+  orchestration and evidence persistence, provider-neutral principal contracts, and normalizers
 - `tests/` — unit and PostgreSQL integration tests
 - `migrations/` — Alembic revisions for snapshot lifecycle and AWS evidence persistence
 

@@ -22,20 +22,24 @@ The current role collector preserves valid roles from earlier pages when a later
 If no valid roles remain after an IAM failure, the attempt is `failed`, not `partial`. A
 successful empty response is `complete`; it is not interchangeable with unavailable data.
 
-Collector attempt status and persisted snapshot status are separate concepts. The integration
-that maps collection results into snapshot transitions has not yet been implemented. Stored
-partial and failed attempts do not transition or activate their snapshots.
+Collector attempt status and persisted snapshot status are separate concepts. Orchestration
+maps a `complete` attempt to `collected`; `partial` and `failed` attempts are retained but map
+to terminal snapshot failure with `AWS_COLLECTION_PARTIAL` or `AWS_COLLECTION_FAILED`.
+Unexpected collector or contract failures are recorded as `AWS_COLLECTION_INTERNAL_ERROR`.
+None of these failure paths activates the snapshot or displaces the prior active snapshot.
 
 The AWS role normalizer accepts only validated role evidence. It preserves source provenance,
 does not convert trust-policy text into an access conclusion, and reports provider fields
 deferred from the principal contract. Invalid or unavailable provider data must not produce a
 normalized principal.
 
-Persistence uses one PostgreSQL transaction for the collection attempt, gaps, evidence, and
-principals. A constraint failure rolls back all writes. Exact retries are idempotent; a retry
-with different content for the same snapshot returns
+Orchestrated persistence uses one PostgreSQL transaction for the collection attempt, gaps,
+evidence, principals, and collection-stage snapshot transition. A constraint failure rolls
+back all writes. Exact retries are idempotent; a retry with different content for the same snapshot returns
 `COLLECTION_PERSISTENCE_CONFLICT`. Evidence cannot be written to a missing, non-collecting, or
-collector-version-mismatched snapshot.
+collector-version-mismatched snapshot. If collection fails before persistence, orchestration
+best-effort records a safe terminal failure; inability to record that failure is surfaced as
+`AWS_COLLECTION_FAILURE_RECORDING_FAILED` rather than reported as success.
 
 ## Kubernetes unavailable
 Same general pattern as provider failure.
