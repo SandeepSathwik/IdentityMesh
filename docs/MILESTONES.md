@@ -25,9 +25,10 @@ Exit:
 Target: End Month 2
 Release: v0.1
 
-Status: in progress. AWS IAM role collection, role-to-principal normalization, and atomic
-PostgreSQL evidence/principal persistence with collection lifecycle orchestration are complete.
-Graph import, API inspection, dashboard rendering, and broader AWS identity coverage remain.
+Status: in progress. The first AWS-role vertical slice is complete: collection, normalization,
+authoritative evidence persistence, verified Neo4j node projection, authenticated API
+inspection/triggering, lifecycle visibility, and a minimal dashboard are implemented. Broader
+AWS users, groups, policies, trust relationships, and OIDC coverage remain before M1 exit.
 
 Deliverables:
 - AWS collector

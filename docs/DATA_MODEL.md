@@ -228,6 +228,20 @@ belong in the principal contract, including trust-policy and permissions-boundar
 reported as deferred fields and remain in the provider evidence. Normalization does not assert
 that any principal can assume the role and does not compute effective permissions.
 
+### Implemented AWS role graph projection
+
+Complete AWS role snapshots are projected into Neo4j as `Principal` and `AwsRole` nodes using
+the versioned `identitymesh.graph-principal/v1` contract. Node properties contain normalized
+identity fields and observed provenance only. Raw trust-policy documents, permissions
+boundaries, tags, and inferred access relationships remain in authoritative evidence rather
+than being copied into the graph.
+
+Each rebuild replaces only the matching snapshot/projection version in one Neo4j transaction.
+An `IdentityMeshProjection` marker records the expected principal count and a canonical SHA-256
+digest. The graph is reread and compared with both values before PostgreSQL may promote the
+snapshot. A complete collection with zero roles therefore produces a verified empty graph,
+while missing or corrupt data fails projection rather than being treated as absence.
+
 ### Implemented evidence persistence
 
 PostgreSQL atomically retains each AWS role collection attempt, its bounded gaps, validated
@@ -240,8 +254,9 @@ Persistence is allowed only while a snapshot is `collecting` and only when the s
 collector version matches the AWS role collector contract. The orchestrated boundary writes
 the attempt and evidence and finalizes collection in one transaction: `complete` advances the
 snapshot to `collected`, while `partial` and `failed` end it in `failed` with stable reason
-codes. None of these transitions project or activate the snapshot, so incomplete evidence
-remains inspectable without silently replacing the prior active snapshot.
+codes. Incomplete collection remains inspectable without silently replacing the prior active
+snapshot. A complete collection proceeds through verified graph projection and becomes active
+only after `complete_projection` succeeds.
 
 ## Schema evolution
 - avoid exposing database schema directly as public API

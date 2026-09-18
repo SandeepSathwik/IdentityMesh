@@ -63,6 +63,7 @@ class FakeAwsIamApi:
     ) -> None:
         self.pages = pages
         self.identity = {"Account": ACCOUNT_ID, "Arn": CALLER_ARN} if identity is None else identity
+        self.page_iterations = 0
 
     def get_caller_identity(self) -> Mapping[str, object]:
         if isinstance(self.identity, Exception):
@@ -70,6 +71,7 @@ class FakeAwsIamApi:
         return self.identity
 
     def iter_role_pages(self) -> Iterator[Mapping[str, object]]:
+        self.page_iterations += 1
         for page in self.pages:
             if isinstance(page, Exception):
                 raise page
@@ -98,6 +100,24 @@ def test_complete_empty_collection_distinguishes_absence_from_unavailability() -
     assert result.status is CollectionStatus.COMPLETE
     assert result.roles == ()
     assert result.gaps == ()
+
+
+def test_rejects_unapproved_account_before_listing_roles() -> None:
+    api = FakeAwsIamApi([{"Roles": [_role()]}])
+    collector = AwsIamRoleCollector(api, allowed_account_id="999999999999")
+
+    result = collector.collect(uuid4())
+
+    assert result.status is CollectionStatus.FAILED
+    assert result.roles == ()
+    assert result.gaps[0].reason_code is CollectionReasonCode.ACCOUNT_NOT_ALLOWED
+    assert api.page_iterations == 0
+
+
+@pytest.mark.parametrize("account_id", ["123", "12345678901x"])
+def test_rejects_invalid_allowed_account_configuration(account_id: str) -> None:
+    with pytest.raises(ValueError, match="12-digit"):
+        AwsIamRoleCollector(FakeAwsIamApi([]), allowed_account_id=account_id)
 
 
 def test_malformed_role_is_reported_while_valid_evidence_is_retained() -> None:

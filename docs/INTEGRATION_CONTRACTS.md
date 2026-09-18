@@ -56,7 +56,8 @@ canonical content digest; conflicting retries fail with a stable reason code. Pe
 requires a matching `collecting` snapshot. The orchestration boundary creates that snapshot,
 runs the synchronous collector outside the event loop, then persists and finalizes collection
 atomically. `complete` maps to `collected`; `partial` and `failed` map to terminal `failed`
-snapshots. The service is not yet connected to an API route or scheduler.
+snapshots. A bearer-authenticated API route runs the complete role pipeline synchronously and
+serializes triggers with a PostgreSQL advisory lock.
 
 ## Normalizer -> Graph
 Graph input should contain:
@@ -67,6 +68,11 @@ Graph input should contain:
 - evidence reference
 
 Graph import should be idempotent for a snapshot.
+
+The first implementation projects only observed AWS role principal nodes. It writes a
+versioned marker plus a canonical content digest, rereads the graph, and requires exact count
+and digest agreement before active promotion. Empty complete snapshots are valid; unverified
+or mixed-version graph data is not.
 
 ## Graph -> Attack Path Engine
 The engine needs:

@@ -51,6 +51,20 @@ boundary atomically writes evidence and advances complete attempts to `collected
 failed attempts become terminal `failed` snapshots. No collection-stage result performs active
 promotion. Retention periods and graph projection details remain deferred.
 
+### Implementation update — 2026-09-18
+
+Complete AWS role snapshots now produce rebuildable Neo4j projections. The projector writes
+only normalized observed principal properties as versioned `Principal`/`AwsRole` nodes plus an
+`IdentityMeshProjection` marker. It computes a canonical digest before writing, rereads the
+committed graph, and requires exact count and digest agreement before PostgreSQL performs
+`ready` promotion. A verified empty projection represents a successful empty collection.
+
+Projection replacement is scoped to one snapshot and projection version and is transactional
+inside Neo4j. Failed writes, failed verification, and corrupt source records transition the
+candidate snapshot to a safe terminal failure while preserving the previous active snapshot.
+Authenticated graph readers resolve the active snapshot in PostgreSQL and query only the exact
+matching Neo4j version. Relationship inference and retention remain deferred.
+
 ## Consequences
 
 ### Positive

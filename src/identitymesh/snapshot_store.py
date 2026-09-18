@@ -67,6 +67,21 @@ _GET_ACTIVE = """
     WHERE active_snapshot.singleton = TRUE AND snapshots.status = $1
 """
 
+_GET_BY_ID = """
+    SELECT snapshot_id, sequence_id, status, collector_version, projection_version,
+           failure_code, created_at, collected_at, projection_started_at, ready_at, failed_at
+    FROM snapshots
+    WHERE snapshot_id = $1
+"""
+
+_LIST_RECENT = """
+    SELECT snapshot_id, sequence_id, status, collector_version, projection_version,
+           failure_code, created_at, collected_at, projection_started_at, ready_at, failed_at
+    FROM snapshots
+    ORDER BY sequence_id DESC
+    LIMIT $1
+"""
+
 
 def _validate_identifier(value: str, field_name: str, max_length: int) -> str:
     normalized = value.strip()
@@ -186,6 +201,24 @@ class SnapshotStore:
                 SnapshotStatus.READY.value,
             )
         return None if record is None else _snapshot_from_record(record)
+
+    async def get(self, snapshot_id: UUID) -> Snapshot:
+        """Return one snapshot without locking or changing lifecycle state."""
+
+        async with self._pool.acquire() as connection:
+            record = await connection.fetchrow(_GET_BY_ID, snapshot_id)
+        if record is None:
+            raise SnapshotNotFoundError(snapshot_id)
+        return _snapshot_from_record(record)
+
+    async def list_recent(self, limit: int = 20) -> tuple[Snapshot, ...]:
+        """Return recent lifecycle records newest first."""
+
+        if not 1 <= limit <= 100:
+            raise ValueError("limit must be between 1 and 100")
+        async with self._pool.acquire() as connection:
+            records = await connection.fetch(_LIST_RECENT, limit)
+        return tuple(_snapshot_from_record(record) for record in records)
 
     async def _transition(
         self,

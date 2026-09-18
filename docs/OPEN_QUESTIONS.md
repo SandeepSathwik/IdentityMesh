@@ -8,7 +8,6 @@ for engineering research, prototypes, benchmarks, and ADRs.
 - What should run synchronously versus in workers?
 - Is Redis needed before scale justifies it?
 - What is the cleanest deployment boundary for the runtime gateway?
-- What validation must a Neo4j projection pass before an authoritative PostgreSQL snapshot is promoted?
 - What retention and cleanup policy should apply to evidence, failed snapshots, and old graph projections?
 
 ## Graph

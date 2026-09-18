@@ -45,7 +45,9 @@ python -m venv .venv
 ```
 
 Copy `.env.example` to `.env` and set unique, local-only values for
-`POSTGRES_PASSWORD` and `NEO4J_PASSWORD`. Do not reuse real credentials.
+`POSTGRES_PASSWORD`, `NEO4J_PASSWORD`, and `IDENTITYMESH_API_TOKEN`. Set
+`IDENTITYMESH_AWS_ALLOWED_ACCOUNT_ID` to the controlled 12-digit account that the read-only
+collector may inspect. Do not reuse real database/API secrets or commit `.env`.
 
 Start the API, PostgreSQL, and Neo4j:
 
@@ -74,6 +76,24 @@ Invoke-RestMethod http://127.0.0.1:8000/health/ready
 probes and returns `503` when PostgreSQL or Neo4j is unavailable; neither endpoint returns
 connection strings or credentials.
 
+Open `http://127.0.0.1:8000/` for the dashboard and enter the configured API token. The token
+is retained only in page memory. The protected API can also be called directly:
+
+```powershell
+$headers = @{ Authorization = "Bearer $env:IDENTITYMESH_API_TOKEN" }
+Invoke-RestMethod -Method Post -Headers $headers `
+  http://127.0.0.1:8000/api/v1/collections/aws/iam/roles
+Invoke-RestMethod -Headers $headers http://127.0.0.1:8000/api/v1/principals
+```
+
+The collection call uses the standard AWS credential chain and performs only
+`sts:GetCallerIdentity` and paginated `iam:ListRoles`. Run live validation only with a
+controlled account and the documented read-only permissions. Synthetic integration tests do
+not require AWS credentials.
+
+The current single-token data API is intentionally accepted only in `local` and `test`
+environments. Do not expose it as a production authentication mechanism.
+
 ## Migrations
 
 With `IDENTITYMESH_POSTGRES_DSN` set for the target database:
@@ -94,11 +114,14 @@ mypy
 pytest --cov --cov-report=term-missing
 ```
 
-Snapshot and evidence persistence tests require an isolated PostgreSQL database whose schema
-has been migrated to `head`:
+Snapshot, evidence, and graph integration tests require isolated PostgreSQL and Neo4j services;
+PostgreSQL must be migrated to `head`:
 
 ```powershell
 $env:IDENTITYMESH_TEST_POSTGRES_DSN = 'postgresql://user:password@127.0.0.1:5432/identitymesh_test'
+$env:IDENTITYMESH_TEST_NEO4J_URI = 'bolt://127.0.0.1:7687'
+$env:IDENTITYMESH_TEST_NEO4J_USERNAME = 'neo4j'
+$env:IDENTITYMESH_TEST_NEO4J_PASSWORD = 'local-test-only'
 alembic --config pyproject.toml upgrade head
 pytest --cov --cov-report=term-missing
 ```

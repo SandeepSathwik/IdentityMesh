@@ -31,12 +31,11 @@ Implement enough to:
 
 Then expand entity coverage.
 
-Status: read-only, paginated AWS IAM role collection, its validated evidence contract, and
-provider-neutral role normalization are implemented. PostgreSQL now atomically persists role
-attempts, gaps, evidence, and normalized principals and finalizes the collection lifecycle.
-The internal orchestration service runs the blocking provider client off the event loop and
-fails incomplete snapshots closed. Graph projection, API exposure, and UI rendering remain
-before this slice is complete.
+Status: complete. Read-only AWS IAM role collection, validation, normalization, authoritative
+PostgreSQL persistence, versioned Neo4j node projection, exact projection verification,
+authenticated API collection/inspection, and a minimal dashboard now form one end-to-end
+slice. Incomplete collection and unverified graph data fail closed without displacing the
+previous active snapshot. This slice deliberately does not infer trust or access edges.
 
 ## Slice 2 — One attack path
 Create a controlled AWS path and detect it.

@@ -11,8 +11,8 @@ IdentityMesh is an open-source security platform for discovering identities, mod
 
 ## Current implementation
 
-The repository currently provides the M0 platform foundation and the first bounded AWS
-collector capability:
+The repository currently provides the M0 platform foundation and a complete first AWS-role
+vertical slice:
 
 - FastAPI service with liveness and authenticated PostgreSQL/Neo4j readiness checks
 - validated environment-based configuration and structured request/error handling
@@ -24,12 +24,17 @@ collector capability:
 - provider-neutral AWS role normalization with deterministic identity and observed provenance
 - collection orchestration that runs the synchronous provider client off the event loop
 - atomic PostgreSQL persistence and lifecycle finalization for AWS role evidence
-- deterministic unit tests and PostgreSQL integration tests in CI on Python 3.10 and 3.12
+- versioned, rebuildable Neo4j projections containing observed AWS role principal nodes
+- deterministic projection digests verified before atomic active-snapshot promotion
+- bearer-authenticated collection, snapshot, principal, and graph APIs
+- a dependency-free identity dashboard with snapshot status, role inventory, and node rendering
+- deterministic unit, PostgreSQL, Neo4j, API, and full-pipeline tests in CI on Python 3.10 and 3.12
 
-Graph projection, attack-path analysis, the dashboard, and runtime authorization remain
-planned work. The collector pipeline is currently an internal service and is not yet exposed
-through the API or a scheduler. A successful collection reaches `collected`; incomplete or
-failed collection is retained as a terminal failed snapshot and never becomes active.
+Broader AWS identity coverage, relationship/edge projection, attack-path analysis, and runtime
+authorization remain planned work. A successful complete collection is projected, verified,
+and promoted to `ready`; incomplete or failed collection is retained as a terminal failed
+snapshot and never becomes active. No trust or effective-access relationship is inferred in
+this role-only slice.
 
 ## Local development
 
@@ -43,8 +48,10 @@ Copy-Item .env.example .env
 docker compose up --build --detach --wait
 ```
 
-Set unique local-only values for `POSTGRES_PASSWORD` and `NEO4J_PASSWORD` in `.env` before
-starting the stack. The API is available at `http://127.0.0.1:8000`; verify it with:
+Set unique local-only values for `POSTGRES_PASSWORD`, `NEO4J_PASSWORD`, and
+`IDENTITYMESH_API_TOKEN`, plus the controlled 12-digit
+`IDENTITYMESH_AWS_ALLOWED_ACCOUNT_ID`, in `.env` before starting the stack. The API and
+dashboard are available at `http://127.0.0.1:8000`; verify the stack with:
 
 ```powershell
 Invoke-RestMethod http://127.0.0.1:8000/health/live

@@ -9,7 +9,7 @@ here describes repository capability, not a release commitment.
 - [x] initialize Python project
 - [x] create local Docker environment
 - [x] create API skeleton
-- [ ] create dashboard skeleton
+- [x] create dashboard skeleton
 - [x] connect PostgreSQL
 - [x] connect Neo4j
 - [x] add migrations
@@ -47,13 +47,13 @@ here describes repository capability, not a release commitment.
 - [x] orchestrate role collection and finalize snapshot lifecycle
 
 ## Epic D — Graph
-- [~] node persistence (normalized principals retained in PostgreSQL; graph projection pending)
-- edge persistence
-- provenance
-- snapshot import
-- graph query service
-- graph API
-- graph visualization
+- [x] node persistence (AWS role principals projected to Neo4j)
+- [ ] edge persistence
+- [x] observed node provenance
+- [x] versioned snapshot import and verification
+- [x] active-snapshot principal query service
+- [x] basic graph API
+- [x] basic role-node visualization
 
 ## Epic E — AWS Attack Paths
 - AssumeRole

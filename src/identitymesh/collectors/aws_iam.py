@@ -41,6 +41,7 @@ class CollectionReasonCode(str, Enum):
     CONNECTION_FAILED = "AWS_CONNECTION_FAILED"
     API_ERROR = "AWS_API_ERROR"
     MALFORMED_RESPONSE = "AWS_MALFORMED_RESPONSE"
+    ACCOUNT_NOT_ALLOWED = "AWS_ACCOUNT_NOT_ALLOWED"
 
 
 class CollectionGap(BaseModel):
@@ -192,9 +193,15 @@ class AwsIamRoleCollector:
         self,
         api: AwsIamApi,
         *,
+        allowed_account_id: str | None = None,
         clock: Callable[[], datetime] | None = None,
     ) -> None:
+        if allowed_account_id is not None and (
+            len(allowed_account_id) != 12 or not allowed_account_id.isdigit()
+        ):
+            raise ValueError("allowed_account_id must be a 12-digit AWS account ID")
         self._api = api
+        self._allowed_account_id = allowed_account_id
         self._clock = clock or (lambda: datetime.now(timezone.utc))
 
     def collect(self, snapshot_id: UUID) -> AwsRoleCollection:
@@ -211,6 +218,20 @@ class AwsIamRoleCollector:
         except (KeyError, TypeError, ValueError):
             gap = _malformed_gap("sts:GetCallerIdentity")
             return _failed_collection(snapshot_id, collected_at, gap)
+
+        if self._allowed_account_id is not None and account_id != self._allowed_account_id:
+            return _failed_collection(
+                snapshot_id,
+                collected_at,
+                CollectionGap(
+                    operation="sts:GetCallerIdentity",
+                    reason_code=CollectionReasonCode.ACCOUNT_NOT_ALLOWED,
+                    retryable=False,
+                    message=(
+                        "AWS credentials belong to an account that is not approved for collection."
+                    ),
+                ),
+            )
 
         roles: list[AwsRoleEvidence] = []
         gaps: list[CollectionGap] = []

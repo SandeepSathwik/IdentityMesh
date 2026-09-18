@@ -87,6 +87,12 @@ permission or role-assumption inference.
 ### Identity graph subsystem
 Maintains graph representation and relationship semantics.
 
+The first implemented projection rebuilds observed AWS role principals from authoritative
+PostgreSQL records. Neo4j nodes are keyed by snapshot and projection version and retain safe,
+flattened provenance. A projection marker stores the expected principal count and canonical
+content digest. The service rereads and verifies the graph before PostgreSQL marks the
+snapshot ready; raw trust policies and inferred access relationships are not projected yet.
+
 ### Attack-path subsystem
 Applies rules and graph traversal to identify dangerous transitive relationships.
 
@@ -136,8 +142,9 @@ Good fit for:
 - attack paths
 - graph projections
 
-Graph data must be keyed by snapshot and projection version. Readers must not combine facts
-from different snapshots or expose a projection before its snapshot is ready.
+Graph data is keyed by snapshot and projection version. Inventory readers first obtain the
+PostgreSQL-owned active ready snapshot, then query only its exact Neo4j projection. They do not
+combine facts from different snapshots or expose an unready projection.
 
 ### Redis
 Optional for:
@@ -168,8 +175,10 @@ transactionally in PostgreSQL. The collection service creates the snapshot, runs
 synchronous provider client outside the event loop, and atomically persists evidence while
 finalizing the snapshot. Complete collection advances to `collected`; partial, failed, and
 unexpected collection failures end in `failed` without changing the active snapshot. The
-graph projection itself, projection verification, API or scheduled collection trigger, and
-retention policy are not yet implemented.
+graph projection writes observed role nodes and a versioned verification marker in one Neo4j
+transaction. Exact digest verification precedes `ready` promotion. A bearer-authenticated API
+can trigger one collection at a time using a PostgreSQL advisory lock. Retention policy and
+relationship/edge projection are not yet implemented.
 
 ## Service topology
 

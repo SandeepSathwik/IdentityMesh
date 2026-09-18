@@ -50,6 +50,19 @@ Same general pattern as provider failure.
 - collection may continue if relational staging supports it
 - runtime policy should not blindly allow due to graph unavailability
 
+The implemented role pipeline advances complete evidence to `projecting`, then records a safe
+terminal graph failure if Neo4j writing or exact digest verification fails. The prior active
+snapshot remains available. A committed but unpromoted graph can be rebuilt idempotently from
+PostgreSQL; it is never exposed merely because Neo4j contains nodes.
+
+## Concurrent AWS collection
+Only one API-triggered role pipeline may hold the PostgreSQL advisory lock. A competing trigger
+returns `AWS_COLLECTION_ALREADY_RUNNING` and does not create another snapshot.
+
+## Wrong AWS account
+The caller account verified by STS must match `IDENTITYMESH_AWS_ALLOWED_ACCOUNT_ID` before IAM
+listing begins. A mismatch returns `AWS_ACCOUNT_NOT_ALLOWED` with no role evidence.
+
 ## PostgreSQL unavailable
 - writes fail safely
 - runtime behavior depends on documented critical dependencies

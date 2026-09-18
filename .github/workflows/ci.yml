@@ -25,6 +25,17 @@ jobs:
           --health-interval 5s
           --health-timeout 3s
           --health-retries 10
+      neo4j:
+        image: neo4j:5.26.30-community
+        env:
+          NEO4J_AUTH: neo4j/identitymesh-ci-only
+        ports:
+          - 7687:7687
+        options: >-
+          --health-cmd "cypher-shell -u neo4j -p identitymesh-ci-only 'RETURN 1'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 12
     strategy:
       matrix:
         python-version: ["3.10", "3.12"]
@@ -60,4 +71,34 @@ jobs:
       - name: Test
         env:
           IDENTITYMESH_TEST_POSTGRES_DSN: postgresql://identitymesh_test:identitymesh-ci-only@127.0.0.1:5432/identitymesh_test
+          IDENTITYMESH_TEST_NEO4J_URI: bolt://127.0.0.1:7687
+          IDENTITYMESH_TEST_NEO4J_USERNAME: neo4j
+          IDENTITYMESH_TEST_NEO4J_PASSWORD: identitymesh-ci-only
         run: pytest --cov --cov-report=term-missing
+
+  compose-smoke:
+    runs-on: ubuntu-latest
+    env:
+      POSTGRES_PASSWORD: identitymesh-compose-only
+      NEO4J_PASSWORD: identitymesh-compose-only
+      IDENTITYMESH_API_TOKEN: identitymesh-compose-token-at-least-32-characters
+      IDENTITYMESH_AWS_ALLOWED_ACCOUNT_ID: "123456789012"
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Start local stack
+        run: docker compose up --build --detach --wait
+
+      - name: Verify API and dashboard
+        run: |
+          curl --fail http://127.0.0.1:8000/health/ready
+          curl --fail http://127.0.0.1:8000/
+
+      - name: Show service logs on failure
+        if: failure()
+        run: docker compose logs --no-color
+
+      - name: Stop local stack
+        if: always()
+        run: docker compose down --volumes --remove-orphans

@@ -63,6 +63,13 @@ tests additionally cover off-event-loop provider execution, atomic collection fi
 concurrent finalization, failure-code mapping, malformed collector output, and preservation of
 the prior active snapshot across partial, failed, and unexpected collection outcomes.
 
+Neo4j integration tests cover populated and empty role projections, exact digest verification,
+idempotent rebuild, corruption detection, active-snapshot isolation, advisory locking, and
+preservation of the previous active graph after projection failure. A synthetic full-pipeline
+test invokes the authenticated collection API and verifies collection through graph-backed API
+reads without cloud credentials. API tests cover bearer authentication, versioned contracts,
+structured errors, active-snapshot absence, security headers, and dashboard delivery.
+
 ### End-to-end tests
 Reference scenarios:
 - discovery -> graph -> finding
@@ -133,8 +140,10 @@ Every PR should run:
 - dependency/security checks
 
 The current CI baseline runs formatting, linting, strict type checking, Alembic migration, and
-the test suite with coverage on Python 3.10 and 3.12. Automated dependency and security
-scanning remain backlog items and must not be represented as already present.
+the PostgreSQL/Neo4j-backed test suite with coverage on Python 3.10 and 3.12. A separate Compose
+smoke job builds the application image, starts the complete local stack, and checks API and
+dashboard availability. Automated dependency and security scanning remain backlog items and
+must not be represented as already present.
 
 Security-critical PRs should additionally run:
 - policy tests

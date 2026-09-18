@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>IdentityMesh Inventory</title>
+    <link rel="stylesheet" href="/assets/dashboard.css">
+  </head>
+  <body>
+    <main class="shell">
+      <header class="masthead">
+        <div>
+          <p class="eyebrow">IdentityMesh · AWS inventory</p>
+          <h1>Observed identities, without hidden inference.</h1>
+          <p class="lede">Inspect the active, verified role projection and recent collection state.</p>
+        </div>
+        <form id="access-form" class="access-panel">
+          <label for="api-token">Admin bearer token</label>
+          <div class="access-row">
+            <input id="api-token" type="password" minlength="32" autocomplete="off" required>
+            <button type="submit">Connect</button>
+          </div>
+          <small>The token stays in memory and is cleared when this page reloads.</small>
+        </form>
+      </header>
+
+      <section id="notice" class="notice" role="status" aria-live="polite">
+        Enter the configured token to load identity data.
+      </section>
+
+      <section class="metrics" aria-label="Active snapshot summary">
+        <article><span>Status</span><strong id="metric-status">Not connected</strong></article>
+        <article><span>Projection</span><strong id="metric-version">—</strong></article>
+        <article><span>AWS roles</span><strong id="metric-count">—</strong></article>
+        <article><span>Ready at</span><strong id="metric-ready">—</strong></article>
+      </section>
+
+      <section class="panel graph-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Active graph</p>
+            <h2>Role principals</h2>
+          </div>
+          <button id="collect-button" class="secondary" type="button" disabled>
+            Collect and project
+          </button>
+        </div>
+        <svg id="graph" viewBox="0 0 960 360" role="img" aria-label="AWS role node graph"></svg>
+        <p id="graph-empty" class="empty">No active projection loaded.</p>
+      </section>
+
+      <div class="columns">
+        <section class="panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Normalized inventory</p>
+              <h2>Principals</h2>
+            </div>
+          </div>
+          <div id="principal-list" class="principal-list"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Operational history</p>
+              <h2>Recent snapshots</h2>
+            </div>
+          </div>
+          <div id="snapshot-list" class="snapshot-list"></div>
+        </section>
+      </div>
+    </main>
+    <script src="/assets/dashboard.js" defer></script>
+  </body>
+</html>
