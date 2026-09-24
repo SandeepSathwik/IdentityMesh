@@ -42,7 +42,8 @@ For a role present in both snapshots, v1 compares:
 - trust-policy document
 - description, maximum session duration, permissions-boundary ARN, and tags
 
-Dictionary key order is ignored; array order remains significant. A reordered policy array
+Dictionary key order is ignored; array order and JSON scalar types remain significant.
+For example, a policy value changing from `true` to `1` is a difference. A reordered policy array
 can therefore produce a metadata difference even when AWS access semantics are equivalent.
 Collection timestamps, collector session ARN, and last-used metadata are excluded from change
 detection. Missing optional evidence versus a populated value is a difference in observations,

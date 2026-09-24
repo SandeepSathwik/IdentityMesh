@@ -150,6 +150,22 @@ def test_pagination_has_stable_counts_no_duplicates_and_terminal_empty_page() ->
     assert compare_sources(base, target) == compare_sources(base, shuffled)
 
 
+def test_policy_json_booleans_and_numbers_remain_distinct_observations() -> None:
+    original = role(uuid4()).model_copy(
+        update={
+            "assume_role_policy_document": {"Condition": {"value": True}},
+        }
+    )
+    changed = original.model_copy(
+        update={
+            "assume_role_policy_document": {"Condition": {"value": 1}},
+        }
+    )
+    result = compare_sources(source(original), source(changed))
+    assert result.changed_count == 1
+    assert result.items[0].changed_fields == ("assume_role_policy_document",)
+
+
 @pytest.mark.parametrize(
     "field,value,code",
     [

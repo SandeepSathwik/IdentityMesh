@@ -1,5 +1,6 @@
 """Bounded, deterministic changes between complete AWS role observations."""
 
+import json
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Literal
@@ -155,9 +156,16 @@ def compare_sources(
         elif new is None:
             kind = "removed"
         else:
-            fields = tuple(
-                field for field in COMPARED_FIELDS if getattr(old, field) != getattr(new, field)
-            )
+            changed_fields: list[ComparedField] = []
+            for field in COMPARED_FIELDS:
+                old_value, new_value = getattr(old, field), getattr(new, field)
+                if field == "assume_role_policy_document":
+                    # Python equality collapses JSON booleans and numbers (True == 1).
+                    old_value = json.dumps(old_value, sort_keys=True)
+                    new_value = json.dumps(new_value, sort_keys=True)
+                if old_value != new_value:
+                    changed_fields.append(field)
+            fields = tuple(changed_fields)
             if not fields:
                 counts["unchanged"] += 1
                 continue
