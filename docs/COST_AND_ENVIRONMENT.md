@@ -18,7 +18,7 @@ Do not begin with production.
 
 ## AWS lab protections
 - dedicated account if practical
-- explicit account allowlist
+- explicit account allowlist (implemented for the current role collector)
 - required environment variable confirming target
 - Terraform state separation
 - resource tags
@@ -26,6 +26,10 @@ Do not begin with production.
 - region allowlist
 - teardown scripts
 - TTL/expiry tags where practical
+
+The current collector verifies the STS caller against the configured 12-digit
+`IDENTITYMESH_AWS_ALLOWED_ACCOUNT_ID` before `ListRoles`. Live controlled-account validation
+is owner-run; automated tests do not contact AWS.
 
 ## Terraform safety
 Potential safeguards:

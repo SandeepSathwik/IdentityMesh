@@ -3,6 +3,9 @@
 ## Purpose
 The attack-path engine identifies transitive relationships that allow a lower-trust principal to obtain dangerous authority or reach sensitive resources.
 
+Status: planned for Slice 2. The current AWS-role projection contains observed nodes and no
+relationships, so it cannot produce attack-path findings yet.
+
 ## Design goals
 - deterministic
 - explainable

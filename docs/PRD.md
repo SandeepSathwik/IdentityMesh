@@ -3,6 +3,11 @@
 ## 1. Product summary
 IdentityMesh is a security platform for identity discovery, privilege graphing, attack-path analysis, delegated authorization, runtime policy enforcement, and security telemetry across cloud workloads and AI agents.
 
+Current pre-alpha delivery covers one AWS IAM role vertical slice: collection, normalization,
+authoritative evidence persistence, verified node-only graph projection, authenticated
+inspection/collection APIs, evidence-backed role snapshot comparison, and a minimal dashboard. The broader requirements below remain
+the product target and must not be read as already implemented.
+
 ## 2. Problem statement
 Organizations increasingly operate environments where humans, cloud services, Kubernetes workloads, CI/CD systems, and autonomous agents can act on each other's behalf. Existing security visibility is fragmented.
 

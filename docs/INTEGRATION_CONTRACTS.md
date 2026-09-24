@@ -74,6 +74,14 @@ versioned marker plus a canonical content digest, rereads the graph, and require
 and digest agreement before active promotion. Empty complete snapshots are valid; unverified
 or mixed-version graph data is not.
 
+## Retained evidence -> Inventory comparison
+
+The implemented `identitymesh.snapshot-comparison/v1` contract accepts two explicit ready
+snapshot IDs with complete same-account AWS role evidence. It validates retained evidence
+against normalized principals and returns deterministic counts plus paginated role references.
+No provider calls, graph writes, policy evaluation, or raw policy/tag values cross this
+boundary. See [Inventory History](INVENTORY_HISTORY.md) for exact field and failure semantics.
+
 ## Graph -> Attack Path Engine
 The engine needs:
 - typed nodes

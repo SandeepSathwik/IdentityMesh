@@ -27,7 +27,8 @@ def _decode_principal(value: object) -> Principal:
         ) from error
 
 
-def _validate_row(row: Mapping[str, Any], snapshot_id: UUID) -> Principal:
+def validate_principal_row(row: Mapping[str, Any], snapshot_id: UUID) -> Principal:
+    """Validate the stored document and its queryable identity columns together."""
     principal = _decode_principal(row["principal"])
     matches = (
         principal.provenance.snapshot_id == snapshot_id
@@ -60,4 +61,4 @@ class PrincipalStore:
                 """,
                 snapshot_id,
             )
-        return tuple(_validate_row(row, snapshot_id) for row in rows)
+        return tuple(validate_principal_row(row, snapshot_id) for row in rows)

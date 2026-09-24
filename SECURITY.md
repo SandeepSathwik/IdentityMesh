@@ -5,6 +5,17 @@ IdentityMesh is expected to pass through experimental and pre-release stages bef
 
 Until a stable release exists, do not assume the project is production-ready.
 
+The current bearer-token data API is intentionally restricted by configuration to local and
+test environments. It is not a production authentication design. The dashboard shell is
+public but contains no identity data; every `/api/v1` data route requires the configured
+token. Collectors use the standard provider credential chain and do not accept credentials in
+API requests.
+
+Snapshot comparisons use the same authentication and read retained complete evidence only.
+They expose safe role references and changed field names, excluding raw trust-policy and tag
+values. These observational differences are not authorization decisions or risk findings;
+see [Inventory History](docs/INVENTORY_HISTORY.md) for completeness checks and residual limits.
+
 ## Reporting a vulnerability
 For a real public repository, configure GitHub Private Vulnerability Reporting or a dedicated security contact before release.
 

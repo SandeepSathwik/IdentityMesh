@@ -114,11 +114,21 @@ Contributors are encouraged to choose libraries, algorithms, data structures, an
 - Docker
 - Terraform
 - Kubernetes
-- React/Next.js dashboard
+- dependency-free FastAPI-served dashboard initially; React/Next.js only when product
+  complexity justifies a separate frontend
 - OpenTelemetry
 - Splunk integration
 
 These are defaults, not immutable constraints. A material deviation should be recorded as an ADR.
+
+## Current delivery boundary
+
+The implemented first vertical slice inventories AWS IAM roles only. It preserves provider
+evidence in PostgreSQL, publishes a verified node-only Neo4j projection, and exposes that
+active projection through an authenticated local/test API and minimal dashboard. It also
+compares complete retained role observations with safe evidence references. It does not
+yet model trust, effective access, attack paths, runtime authorization, or the remaining AWS
+identity types. M1 therefore remains in progress.
 
 ## Explicit non-goals
 IdentityMesh V1 is not intended to become:

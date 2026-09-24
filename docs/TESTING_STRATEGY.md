@@ -71,6 +71,14 @@ reads without cloud credentials. API tests cover bearer authentication, versione
 structured errors, active-snapshot absence, security headers, and dashboard delivery.
 
 ### End-to-end tests
+
+Inventory-history regression tests cover stable identity, recreated roles, metadata changes,
+observation/usage noise, complete-empty snapshots, cursor pagination, account/version/order
+compatibility, and response value exclusion. Real PostgreSQL tests validate retained historical
+reads, missing/unready snapshots, corrupt documents/columns, and evidence-count mismatches.
+API tests verify authentication, malformed parameters, and reason-coded failures. Comparison
+uses synthetic data only; it does not claim to validate live AWS policy semantics.
+
 Reference scenarios:
 - discovery -> graph -> finding
 - agent request -> policy -> denial -> event

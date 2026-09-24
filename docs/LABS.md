@@ -5,6 +5,9 @@ Labs make IdentityMesh demonstrable, testable, and credible.
 
 Every lab should be safe, isolated, reproducible, and intentionally vulnerable.
 
+Status: planned. Current automated validation uses synthetic provider responses and local
+PostgreSQL/Neo4j services; no cloud lab is deployed by CI.
+
 ## Lab principles
 - synthetic identities and data
 - isolated accounts/namespaces

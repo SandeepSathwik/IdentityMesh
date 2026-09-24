@@ -44,7 +44,11 @@ Use for security-sensitive PRs.
 
 ## Data
 - Is source provenance retained?
+- Can incomplete collection or mismatched account scope produce false inventory removals?
+- Are comparison results clearly distinguished from effective-access findings?
 - Is stale data distinguishable?
+- Can an incomplete or unverifiable projection become active?
+- Are raw provider documents excluded from derived graph/API views unless explicitly required?
 - Are destructive migrations safe?
 
 ## Supply chain

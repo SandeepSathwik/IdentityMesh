@@ -3,6 +3,19 @@
 ## Goal
 Demonstrate IdentityMesh in under 10 minutes without requiring the audience to understand implementation details.
 
+Status: future v1 flagship demo. The current demonstrable flow ends at authenticated AWS role
+collection, verified node projection, dashboard inventory, and observed snapshot comparison; it does not yet include paths,
+findings, enforcement, or SIEM output.
+
+## Current inventory-history demonstration
+
+After two controlled-account role collections reach `ready`, connect to the dashboard and
+choose the older and newer snapshots in **Compare observations**. Show counts and evidence
+references, then explain that metadata differences do not establish effective access. A failed
+collection is excluded from the choices. Reversing the pair produces an explicit order error.
+The API supports the same flow and pagination. Automated tests exercise synthetic examples
+without changing AWS; live validation remains owner-run in the allowlisted account.
+
 ## Story
 A developer has legitimate development access.
 

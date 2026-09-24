@@ -80,8 +80,10 @@ mypy
 pytest --cov --cov-report=term-missing
 ```
 
-PostgreSQL snapshot integration tests run when `IDENTITYMESH_TEST_POSTGRES_DSN` points to a
-dedicated migrated test database. CI provisions this database and runs the complete suite.
+PostgreSQL integration tests run when `IDENTITYMESH_TEST_POSTGRES_DSN` points to a dedicated,
+migrated test database. Graph and full-pipeline tests additionally require
+`IDENTITYMESH_TEST_NEO4J_URI`, `IDENTITYMESH_TEST_NEO4J_USERNAME`, and
+`IDENTITYMESH_TEST_NEO4J_PASSWORD`. CI provisions both databases and runs the complete suite.
 
 A security rule should include:
 - positive

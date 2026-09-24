@@ -41,6 +41,16 @@ collector-version-mismatched snapshot. If collection fails before persistence, o
 best-effort records a safe terminal failure; inability to record that failure is surfaced as
 `AWS_COLLECTION_FAILURE_RECORDING_FAILED` rather than reported as success.
 
+## Inventory comparison failure
+
+Comparison rejects non-ready snapshots, incompatible account/collector scope, reversed order,
+and incomplete or inconsistent evidence instead of fabricating removals. Complete-empty
+observations are valid. PostgreSQL read errors and statement timeouts return
+`COMPARISON_UNAVAILABLE`; invalid retained records return `COMPARISON_SOURCE_INVALID`.
+The dashboard clears comparison results after a failed request or changed selection. Neither
+success nor failure changes the active snapshot. Full codes and limits are in
+[Inventory History](INVENTORY_HISTORY.md).
+
 ## Kubernetes unavailable
 Same general pattern as provider failure.
 
@@ -55,6 +65,13 @@ terminal graph failure if Neo4j writing or exact digest verification fails. The 
 snapshot remains available. A committed but unpromoted graph can be rebuilt idempotently from
 PostgreSQL; it is never exposed merely because Neo4j contains nodes.
 
+Stable graph failure codes distinguish invalid PostgreSQL source records
+(`GRAPH_SOURCE_INVALID`), Neo4j write/read failure (`GRAPH_PROJECTION_FAILED`), exact-content
+mismatch (`GRAPH_PROJECTION_VERIFICATION_FAILED`), unexpected projection failure
+(`GRAPH_PROJECTION_INTERNAL_ERROR`), and inability to persist terminal failure
+(`GRAPH_PROJECTION_FAILURE_RECORDING_FAILED`). PostgreSQL API failures return the safe
+`DATA_STORE_UNAVAILABLE` envelope rather than connection details.
+
 ## Concurrent AWS collection
 Only one API-triggered role pipeline may hold the PostgreSQL advisory lock. A competing trigger
 returns `AWS_COLLECTION_ALREADY_RUNNING` and does not create another snapshot.
@@ -67,6 +84,10 @@ listing begins. A mismatch returns `AWS_ACCOUNT_NOT_ALLOWED` with no role eviden
 - writes fail safely
 - runtime behavior depends on documented critical dependencies
 - avoid accepting actions that cannot be audited if audit is mandatory
+
+The current data API returns `503 DATA_STORE_UNAVAILABLE` with a request ID and no connection
+details. A PostgreSQL failure before or during snapshot promotion cannot expose an unready
+projection as active.
 
 ## Policy engine unavailable
 Default for sensitive actions:

@@ -41,6 +41,20 @@ Exit:
 - collection errors visible
 - provider evidence retained
 
+### M1a — Evidence-backed inventory history
+
+Status: implemented on 2026-09-24 as a supporting milestone; broader M1 remains in progress.
+
+Deliverables and exit criteria:
+- compare two complete, ready AWS role snapshots from the same account
+- deterministic added, removed, changed, and unchanged results with safe evidence references
+- authenticated paginated API and usable dashboard comparison controls
+- reject partial, unready, incompatible, missing, and inconsistent evidence
+- preserve active inventory and exclude raw policy/tag values from responses
+- deterministic unit/API tests and real PostgreSQL regression tests
+
+See [Inventory History](INVENTORY_HISTORY.md) for implementation, limits, and follow-up scope.
+
 ## M2 — AWS Attack Paths
 Target: End Month 4
 Release: v0.2

@@ -17,8 +17,7 @@ Prove:
 - authenticated dependency health checks work
 
 Status: the service, configuration, PostgreSQL/Neo4j readiness, migration gate, CI baseline,
-and snapshot lifecycle foundation are implemented. A visual health dashboard has not been
-built and is not required to begin Slice 1.
+snapshot lifecycle foundation, and public dashboard shell are implemented.
 
 ## Slice 1 — One AWS role end to end
 Implement enough to:
@@ -36,6 +35,14 @@ PostgreSQL persistence, versioned Neo4j node projection, exact projection verifi
 authenticated API collection/inspection, and a minimal dashboard now form one end-to-end
 slice. Incomplete collection and unverified graph data fail closed without displacing the
 previous active snapshot. This slice deliberately does not infer trust or access edges.
+
+### Slice 1 extension — Inventory history
+
+Implemented as supporting milestone M1a: validate two retained complete role observations,
+compare stable identities and selected metadata, and expose safe paginated differences through
+the authenticated API and dashboard. This reuses PostgreSQL evidence without new provider
+permissions or graph semantics. Broader AWS inventory remains the next M1 coverage work.
+See [Inventory History](INVENTORY_HISTORY.md).
 
 ## Slice 2 — One attack path
 Create a controlled AWS path and detect it.

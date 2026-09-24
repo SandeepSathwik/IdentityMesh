@@ -58,6 +58,12 @@ button.secondary { color: var(--ink); border: 1px solid var(--line); background:
 .pill { padding: 3px 7px; border-radius: 999px; background: rgba(114, 224, 189, 0.12); }
 .pill.failed { color: var(--danger); background: rgba(255, 139, 139, 0.12); }
 .empty { margin: 18px 0 0; text-align: center; }
+.comparison-panel { margin-bottom: 12px; }
+.comparison-controls { display: flex; flex-wrap: wrap; gap: 14px; align-items: end; }
+.comparison-controls label { display: grid; gap: 8px; flex: 1; min-width: 200px; }
+select { padding: 11px; color: var(--ink); background: #071014; border: 1px solid var(--line); border-radius: 9px; width: 100%; }
+#comparison-status { color: var(--muted); overflow-wrap: anywhere; }
+#comparison-more { margin-top: 14px; }
 
 @media (max-width: 800px) {
   .masthead, .columns { grid-template-columns: 1fr; }

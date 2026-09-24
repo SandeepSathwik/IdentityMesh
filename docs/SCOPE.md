@@ -10,6 +10,14 @@ IdentityMesh is intentionally ambitious, but V1 must remain coherent. Every feat
 
 Features outside those pillars require strong justification.
 
+## Current implementation scope
+
+The repository currently implements only the first AWS IAM role vertical slice within this
+V1 scope. It collects roles, retains evidence, projects verified observed role nodes, and
+serves active inventory and complete-snapshot comparisons through a local/test API and dashboard. Users, groups, policies,
+OIDC providers, graph relationships, attack paths, and runtime enforcement remain future
+increments.
+
 ## V1 in scope
 
 ### AWS

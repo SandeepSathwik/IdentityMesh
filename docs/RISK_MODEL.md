@@ -5,6 +5,8 @@ Prioritize findings using transparent, reproducible signals.
 
 Risk scoring should help order work. It should not pretend to be mathematically exact.
 
+Status: planned. The role-inventory slice does not create findings or assign risk scores.
+
 ## Principles
 - deterministic for the same inputs
 - explainable

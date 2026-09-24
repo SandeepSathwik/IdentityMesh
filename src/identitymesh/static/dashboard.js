@@ -5,6 +5,97 @@
   const byId = (id) => document.getElementById(id);
   const notice = byId("notice");
   const collectButton = byId("collect-button");
+  let comparisonQuery = null;
+  let comparisonCursor = null;
+  let comparisonGeneration = 0;
+
+  function resetComparison() {
+    comparisonGeneration += 1;
+    comparisonQuery = null;
+    comparisonCursor = null;
+    clear(byId("comparison-list"));
+    byId("comparison-more").hidden = true;
+  }
+
+  function comparisonChoices(items) {
+    resetComparison();
+    const ready = items.filter((item) => item.status === "ready");
+    for (const id of ["comparison-base", "comparison-target"]) {
+      const select = byId(id);
+      clear(select);
+      ready.forEach((item) => {
+        const option = document.createElement("option");
+        option.value = item.snapshot_id;
+        option.textContent = `#${item.sequence_id} · ${formatTime(item.collected_at)}`;
+        select.appendChild(option);
+      });
+      select.disabled = ready.length < 2;
+    }
+    if (ready.length >= 2) byId("comparison-base").value = ready[1].snapshot_id;
+    byId("compare-button").disabled = ready.length < 2;
+    byId("comparison-status").textContent = ready.length < 2
+      ? "Two ready snapshots are needed. Incomplete collections cannot establish absence."
+      : "Choose from the latest 100 collection attempts. Raw policy and tag values stay private.";
+  }
+
+  async function loadComparison(append = false) {
+    if (!comparisonQuery) return;
+    const generation = comparisonGeneration;
+    const query = new URLSearchParams(comparisonQuery);
+    if (append && comparisonCursor) query.set("cursor", comparisonCursor);
+    byId("compare-button").disabled = true;
+    byId("comparison-more").disabled = true;
+    byId("comparison-status").textContent = "Comparing complete observations…";
+    try {
+      const result = await api(`/api/v1/snapshots/compare?${query}`);
+      if (generation !== comparisonGeneration) return;
+      const list = byId("comparison-list");
+      result.items.forEach((change) => {
+        const role = change.after || change.before;
+        list.appendChild(record(`${change.kind}: ${role.display_name}`, role.source_id,
+          [role.role_id, ...change.changed_fields]));
+      });
+      comparisonCursor = result.next_cursor;
+      byId("comparison-more").hidden = !comparisonCursor;
+      byId("comparison-status").textContent =
+        `${result.added_count} added · ${result.removed_count} removed · ` +
+        `${result.changed_count} changed · ${result.unchanged_count} unchanged. ` +
+        `Showing ${list.children.length} of ${result.total_count} changes. ` +
+        `Account ${result.account_id}; ${formatTime(result.base_collected_at)} → ` +
+        `${formatTime(result.target_collected_at)}. Metadata differences do not establish access.`;
+    } catch (error) {
+      if (generation !== comparisonGeneration) return;
+      // Never leave a successful-looking partial comparison after an error.
+      clear(byId("comparison-list"));
+      comparisonCursor = null;
+      byId("comparison-more").hidden = true;
+      byId("comparison-status").textContent = `${error.code || "REQUEST_FAILED"}: ${error.message}`;
+    } finally {
+      if (generation === comparisonGeneration) {
+        byId("compare-button").disabled = false;
+        byId("comparison-more").disabled = false;
+      }
+    }
+  }
+
+  byId("comparison-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    resetComparison();
+    comparisonQuery = {
+      base_snapshot_id: byId("comparison-base").value,
+      target_snapshot_id: byId("comparison-target").value,
+      limit: "50",
+    };
+    loadComparison();
+  });
+  byId("comparison-more").addEventListener("click", () => loadComparison(true));
+  for (const id of ["comparison-base", "comparison-target"]) {
+    byId(id).addEventListener("change", () => {
+      resetComparison();
+      byId("compare-button").disabled = false;
+      byId("comparison-status").textContent = "Selection changed. Compare to load these observations.";
+    });
+  }
 
   function setNotice(message, isError = false) {
     notice.textContent = message;
@@ -82,8 +173,9 @@
   }
 
   async function loadSnapshots() {
-    const snapshots = await api("/api/v1/snapshots?limit=20");
-    renderSnapshots(snapshots.items);
+    const snapshots = await api("/api/v1/snapshots?limit=100");
+    renderSnapshots(snapshots.items.slice(0, 20));
+    comparisonChoices(snapshots.items);
   }
 
   function renderGraph(nodes) {
@@ -154,6 +246,7 @@
     const tokenInput = byId("api-token");
     token = tokenInput.value;
     tokenInput.value = "";
+    comparisonChoices([]);
     collectButton.disabled = false;
     try {
       await refresh();

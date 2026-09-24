@@ -6,6 +6,13 @@
 - **MAY**: optional
 - **OPEN**: intentionally left for design exploration
 
+## Current implementation status
+
+The AWS-role slice satisfies the initial collection, provenance, snapshot, node-projection,
+authentication, inventory-display, and observed-history comparison subset of these requirements. Relationship semantics,
+attack paths, authorization, delegation, telemetry, and labs remain unimplemented. M1 is still
+in progress.
+
 ## Identity model requirements
 - MUST assign globally unique internal IDs.
 - MUST preserve original provider IDs.
@@ -37,7 +44,8 @@
 - MUST allow criticality metadata on resources.
 - SHOULD support edge confidence or evidence metadata.
 - SHOULD support path deduplication.
-- OPEN: exact graph schema and projection strategy.
+- OPEN: relationship schema, edge evidence, and future incremental projection strategy. The
+  initial AWS-role node projection is defined by ADR-0001 and the data model.
 
 ## Attack-path requirements
 - MUST produce reproducible results for the same snapshot and rule set.
@@ -95,6 +103,10 @@
 - SHOULD show evidence and remediation.
 - SHOULD permit filtering by severity/type/provider.
 - OPEN: exact frontend graph library and UX.
+
+The current minimal dashboard intentionally implements only active snapshot state, AWS role
+inventory, failures/staleness, a node-only SVG view, and complete-snapshot comparison. Findings, paths, decisions, and richer
+filtering depend on later slices.
 
 ## Security-lab requirements
 - MUST be isolated.

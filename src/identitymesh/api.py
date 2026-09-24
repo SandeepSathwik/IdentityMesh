@@ -10,6 +10,7 @@ from fastapi import APIRouter, Depends, Query, Request, status
 from pydantic import BaseModel, ConfigDict, Field
 
 from identitymesh.aws_collection_service import AwsCollectionRunError
+from identitymesh.comparison_store import SnapshotComparisonService
 from identitymesh.config import Settings
 from identitymesh.graph_projection import GraphProjectionError, ProjectedPrincipal
 from identitymesh.identity_pipeline import (
@@ -19,6 +20,7 @@ from identitymesh.identity_pipeline import (
     IdentityPipelineRunError,
 )
 from identitymesh.inventory import ActiveSnapshotNotFoundError, InventoryService
+from identitymesh.snapshot_comparison import ComparisonError, ComparisonResponse
 from identitymesh.snapshots import Snapshot
 
 
@@ -46,6 +48,7 @@ class ApplicationServices:
 
     coordinator: AwsRolePipelineCoordinator
     inventory: InventoryService
+    comparisons: SnapshotComparisonService | None = None
 
 
 class SnapshotResponse(BaseModel):
@@ -213,6 +216,29 @@ def build_data_router(settings: Settings) -> APIRouter:
             )
 
     auth = Depends(require_bearer)
+
+    @router.get(
+        "/snapshots/compare",
+        response_model=ComparisonResponse,
+        dependencies=[auth],
+        tags=["inventory"],
+    )
+    async def compare_snapshots(
+        request: Request,
+        base_snapshot_id: UUID,
+        target_snapshot_id: UUID,
+        limit: int = Query(default=50, ge=1, le=100),
+        cursor: UUID | None = Query(default=None),
+    ) -> ComparisonResponse:
+        comparisons = _services(request).comparisons
+        if comparisons is None:
+            raise ApiError(503, "COMPARISON_UNAVAILABLE", "Snapshot comparison is unavailable.")
+        try:
+            return await comparisons.compare(
+                base_snapshot_id, target_snapshot_id, limit=limit, cursor=cursor
+            )
+        except ComparisonError as error:
+            raise ApiError(error.status_code, error.reason_code, str(error)) from error
 
     @router.post(
         "/collections/aws/iam/roles",

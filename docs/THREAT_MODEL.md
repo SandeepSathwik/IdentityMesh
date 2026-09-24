@@ -116,6 +116,24 @@ Test infrastructure affects unintended systems or incurs uncontrolled cost.
 
 ## Security controls
 
+Implemented in the current AWS-role slice: startup configuration validation, a constant-time
+compared bearer token on all data routes, an AWS account allowlist checked before role
+listing, PostgreSQL advisory locking for collection triggers, exact graph digest verification,
+active-snapshot isolation, safe reason codes, and exclusion of credentials and raw trust-policy
+documents from graph/API output. The broader controls below are target controls unless their
+implementation is documented elsewhere.
+
+### Inventory comparison
+
+Threats include false removals from incomplete collections, cross-account comparison, corrupt
+stored records, unbounded read cost, and metadata leakage. Controls require ready complete
+observations, compatible scope, validated evidence/principal consistency, a 10,000-role bound,
+five-second SQL statement timeout, and the existing bearer authentication. Responses expose
+changed field names and safe provenance, excluding raw policy/tag/description values. Results
+remain observations and cannot authorize actions. Trusted database compromise, provider
+listing races, and syntactic-versus-semantic policy differences remain documented limitations
+in [Inventory History](INVENTORY_HISTORY.md).
+
 ### Identity
 - authenticated callers
 - explicit principal type

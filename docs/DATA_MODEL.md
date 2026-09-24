@@ -200,7 +200,9 @@ PostgreSQL currently stores authoritative snapshot control records with:
 
 Only legal forward transitions are accepted. Snapshot promotion is atomic, and only the newest
 completed projection may become active. AWS role evidence now drives the collection-stage
-transition, while Neo4j projection remains unimplemented.
+transition. Complete collections then pass through Neo4j projection, exact content
+verification, and atomic `ready` promotion; failed or unverifiable projections never replace
+the prior active snapshot.
 
 ### Implemented AWS IAM role evidence
 
@@ -265,14 +267,23 @@ only after `complete_projection` succeeds.
 - document breaking model changes
 - create ADRs for foundational schema changes
 
+## Implemented comparison response
+
+`identitymesh.snapshot-comparison/v1` references two immutable ready snapshots and returns
+account ID, observation times, compared field names, total counts, and a UUID-ordered page.
+Role changes use the existing account/immutable-role-ID identity contract; recreation produces
+removal plus addition. Before/after references contain only role identity and provenance.
+Raw policy, description, boundary, and tag values remain in authoritative evidence. No new
+tables or persisted findings are introduced. See [Inventory History](INVENTORY_HISTORY.md).
+
 ## Open design space
 Contributors may propose:
 - Pydantic model hierarchy
-- SQL schema
-- Neo4j labels
+- schema evolution beyond the current snapshot/evidence tables
+- Neo4j labels beyond the current `Principal`, `AwsRole`, and `IdentityMeshProjection` model
 - edge metadata
-- provider evidence persistence
+- evidence models for additional providers and AWS entity types
 - event envelope
-- graph projection strategy
+- incremental or relationship projection strategies
 
 The model should be validated against real AWS, Kubernetes, and agent examples before being considered stable.

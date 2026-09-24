@@ -9,6 +9,8 @@ architectural constraint; use `git ls-files` for the authoritative file list.
   AWS collection and projection orchestration, PostgreSQL evidence persistence, Neo4j graph
   projection/query services, provider-neutral principal contracts, and normalizers
 - `tests/` — unit, API, PostgreSQL, Neo4j, and synthetic full-pipeline integration tests
+- `src/identitymesh/snapshot_comparison.py` and `comparison_store.py` — deterministic observed
+  role differences and validated PostgreSQL history reads
 - `migrations/` — Alembic revisions for snapshot lifecycle and AWS evidence persistence
 
 ## Runtime and tooling
@@ -18,7 +20,8 @@ architectural constraint; use `git ls-files` for the authoritative file list.
 - `pyproject.toml` — package metadata and tool configuration
 - `requirements.lock` — reproducible Python dependency set
 - `.env.example` — non-secret configuration template
-- `.github/workflows/ci.yml` — Python quality and PostgreSQL integration workflow
+- `.github/workflows/ci.yml` — Python quality, PostgreSQL/Neo4j integration, and Compose smoke
+  workflow
 
 ## Public project documentation
 
@@ -28,6 +31,7 @@ architectural constraint; use `git ls-files` for the authoritative file list.
 - `CODE_OF_CONDUCT.md` — community conduct
 - `docs/` — product, architecture, security, testing, development, and planning references
 - `docs/adr/` — accepted and proposed architecture decision records
+- `docs/INVENTORY_HISTORY.md` — implemented M1a plan, acceptance criteria, API, and limits
 - `.github/ISSUE_TEMPLATE/` and `.github/PULL_REQUEST_TEMPLATE.md` — contribution templates
 
 Local-only workspace guidance and intentionally untracked material are excluded from this

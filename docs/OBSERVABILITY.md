@@ -8,6 +8,10 @@ Observability must support:
 - security investigation
 - demo transparency
 
+Status: the current API provides request IDs, safe structured error envelopes, and basic
+service logging. The event schema, OpenTelemetry instrumentation, audit pipeline, metrics,
+and Splunk integration below remain planned.
+
 ## Signals
 
 ### Logs

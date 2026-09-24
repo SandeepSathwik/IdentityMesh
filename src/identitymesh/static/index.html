@@ -49,6 +49,22 @@
         <p id="graph-empty" class="empty">No active projection loaded.</p>
       </section>
 
+      <section class="panel comparison-panel" aria-labelledby="comparison-heading">
+        <p class="eyebrow">Inventory history</p>
+        <h2 id="comparison-heading">Compare observations</h2>
+        <p class="lede">Choose two ready snapshots from the same AWS account. Differences describe
+          collected role metadata, not effective permissions. Removed means absent from the later
+          collection; AWS listings are not atomic point-in-time inventories.</p>
+        <form id="comparison-form" class="comparison-controls">
+          <label>Base snapshot <select id="comparison-base" required disabled></select></label>
+          <label>Target snapshot <select id="comparison-target" required disabled></select></label>
+          <button id="compare-button" type="submit" disabled>Compare</button>
+        </form>
+        <p id="comparison-status" role="status" aria-live="polite">Connect to load snapshot choices.</p>
+        <div id="comparison-list" class="principal-list"></div>
+        <button id="comparison-more" class="secondary" type="button" hidden>Load more changes</button>
+      </section>
+
       <div class="columns">
         <section class="panel">
           <div class="panel-heading">

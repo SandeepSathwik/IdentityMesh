@@ -3,6 +3,9 @@
 ## Purpose
 Track whether IdentityMesh is becoming useful and reliable.
 
+Status: these are target metrics. The current role slice has automated quality/coverage gates
+and returns collection/change counts, but it does not yet publish an operational metrics endpoint.
+
 ## Engineering metrics
 - test pass rate
 - flaky test count

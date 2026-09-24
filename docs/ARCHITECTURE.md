@@ -111,6 +111,13 @@ Emits security events and audit records.
 ### Dashboard
 Explores identities, evidence, paths, policies, findings, and events.
 
+The current implementation is deliberately narrower: a static FastAPI-served shell requests
+authenticated snapshot, role inventory, node-only graph data, and observed history comparisons.
+The bearer token remains in browser memory, and provider strings are inserted with safe DOM
+text APIs. Findings, inferred
+relationships, policies, and events are not displayed because those subsystems do not exist
+yet.
+
 ## Data ownership
 The persistence boundary is defined by
 [ADR-0001](adr/0001-persistence-and-snapshot-projection.md): PostgreSQL is authoritative for
@@ -181,6 +188,16 @@ can trigger one collection at a time using a PostgreSQL advisory lock. Retention
 relationship/edge projection are not yet implemented.
 
 ## Service topology
+
+### Inventory history reads
+
+The comparison service reads two retained ready snapshots and their collection attempts,
+evidence, and normalized principals in one PostgreSQL read-only repeatable-read transaction.
+It requires complete, compatible observations, validates cross-record consistency, and
+computes bounded deterministic differences without querying Neo4j or changing active state.
+The API and dashboard expose counts and safe before/after references, excluding raw policy,
+tag, and description values or inferred permissions. See
+[ADR-0002](adr/0002-observed-inventory-comparison.md).
 
 ### Early stage
 Prefer a modular monolith or small number of services.

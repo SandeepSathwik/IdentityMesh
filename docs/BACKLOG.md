@@ -54,6 +54,10 @@ here describes repository capability, not a release commitment.
 - [x] active-snapshot principal query service
 - [x] basic graph API
 - [x] basic role-node visualization
+- [x] evidence-backed ready-snapshot comparison with scope/completeness checks
+- [x] paginated inventory-history API and dashboard changes view
+- [ ] dashboard browsing beyond the latest 100 collection attempts
+- [ ] benchmark and optimize comparisons beyond 10,000 roles per snapshot
 
 ## Epic E — AWS Attack Paths
 - AssumeRole

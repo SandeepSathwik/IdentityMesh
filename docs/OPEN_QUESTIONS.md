@@ -11,7 +11,7 @@ for engineering research, prototypes, benchmarks, and ADRs.
 - What retention and cleanup policy should apply to evidence, failed snapshots, and old graph projections?
 
 ## Graph
-- Which labels and relationship types produce the clearest model?
+- Which relationship types should extend the implemented `Principal`/`AwsRole` node model?
 - Store provider-native edges, normalized edges, or both?
 - How should inferred edges be versioned?
 - Cypher-only rules versus application-layer graph algorithms?
@@ -21,8 +21,8 @@ for engineering research, prototypes, benchmarks, and ADRs.
 - How should stale edges affect confidence?
 
 ## Identity
-- How should a principal be globally identified across providers?
-- How should identity aliases be reconciled?
+- How should deterministic provider identities be reconciled across providers and aliases?
+- What evidence and confidence should be required before linking identity aliases?
 - What does "owner" mean for an AI agent?
 - How should CI/CD identity fit the model?
 - Should credentials be first-class graph nodes?

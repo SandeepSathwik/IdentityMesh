@@ -9,15 +9,17 @@ IdentityMesh should be developed as a real security product:
 - reproducible local environment
 
 ## Recommended environment
-- Python supported stable release
+- Python 3.10 or newer
 - Docker
 - Docker Compose
 - Git
 - optional local Kubernetes
 - Terraform
-- Node.js for dashboard
 - Neo4j
 - PostgreSQL
+
+The current dashboard is packaged static HTML, CSS, and JavaScript and does not require
+Node.js or a separate frontend toolchain.
 
 Exact versions should be pinned in project configuration rather than this document.
 
@@ -45,7 +47,8 @@ python -m venv .venv
 ```
 
 Copy `.env.example` to `.env` and set unique, local-only values for
-`POSTGRES_PASSWORD`, `NEO4J_PASSWORD`, and `IDENTITYMESH_API_TOKEN`. Set
+`POSTGRES_PASSWORD`, `NEO4J_PASSWORD`, and `IDENTITYMESH_API_TOKEN`. The API token must contain
+32–256 printable, non-whitespace ASCII characters. Set
 `IDENTITYMESH_AWS_ALLOWED_ACCOUNT_ID` to the controlled 12-digit account that the read-only
 collector may inspect. Do not reuse real database/API secrets or commit `.env`.
 
@@ -94,6 +97,21 @@ not require AWS credentials.
 The current single-token data API is intentionally accepted only in `local` and `test`
 environments. Do not expose it as a production authentication mechanism.
 
+## Compare retained observations
+
+After two successful collections, select the base and target in the dashboard's **Compare
+observations** panel. The earlier snapshot is the base. The API equivalent is:
+
+```powershell
+$query = "base_snapshot_id=$baseId&target_snapshot_id=$targetId&limit=50"
+Invoke-RestMethod -Headers $headers "http://127.0.0.1:8000/api/v1/snapshots/compare?$query"
+```
+
+Set `$baseId` and `$targetId` from `GET /api/v1/snapshots`. Keep both IDs unchanged when using
+`next_cursor` for later pages. Metadata differences do not establish access changes. See
+[Inventory History](INVENTORY_HISTORY.md) for failure codes and scope. No migration is needed
+for comparison of existing role snapshots.
+
 ## Migrations
 
 With `IDENTITYMESH_POSTGRES_DSN` set for the target database:
@@ -122,9 +140,15 @@ $env:IDENTITYMESH_TEST_POSTGRES_DSN = 'postgresql://user:password@127.0.0.1:5432
 $env:IDENTITYMESH_TEST_NEO4J_URI = 'bolt://127.0.0.1:7687'
 $env:IDENTITYMESH_TEST_NEO4J_USERNAME = 'neo4j'
 $env:IDENTITYMESH_TEST_NEO4J_PASSWORD = 'local-test-only'
+$env:IDENTITYMESH_POSTGRES_DSN = $env:IDENTITYMESH_TEST_POSTGRES_DSN
 alembic --config pyproject.toml upgrade head
+Remove-Item Env:IDENTITYMESH_POSTGRES_DSN
 pytest --cov --cov-report=term-missing
 ```
+
+Set `IDENTITYMESH_POSTGRES_DSN` only for the migration command; remove it before the test
+command so configuration-isolation tests do not inherit runtime dependency settings. Keep
+the `IDENTITYMESH_TEST_*` variables set for integration tests.
 
 Do not point the test variable at a database containing data that must be retained. AWS
 collector tests use synthetic protocol-backed responses and require no cloud credentials.

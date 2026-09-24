@@ -26,6 +26,11 @@ M1 is complete.
 
 This status note does not change the phase outcomes or expand V1 scope.
 
+The M1a supporting milestone adds read-only comparison of complete retained AWS role
+observations through an authenticated paginated API and dashboard. It makes the existing
+snapshot history useful while preserving M1's remaining AWS coverage requirements. See
+[Inventory History](INVENTORY_HISTORY.md).
+
 ---
 
 ## Phase 0 — Foundation

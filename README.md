@@ -17,7 +17,7 @@ vertical slice:
 - FastAPI service with liveness and authenticated PostgreSQL/Neo4j readiness checks
 - validated environment-based configuration and structured request/error handling
 - PostgreSQL-owned snapshot lifecycle with atomic active-snapshot promotion
-- Neo4j reserved as a rebuildable graph projection, as recorded in ADR-0001
+- Neo4j used as a rebuildable graph projection, as recorded in ADR-0001
 - Alembic migrations applied before the API starts in Docker Compose
 - read-only AWS IAM role collection using STS identity verification and paginated `ListRoles`
 - explicit `complete`, `partial`, and `failed` collection results with safe reason codes
@@ -28,13 +28,21 @@ vertical slice:
 - deterministic projection digests verified before atomic active-snapshot promotion
 - bearer-authenticated collection, snapshot, principal, and graph APIs
 - a dependency-free identity dashboard with snapshot status, role inventory, and node rendering
+- evidence-backed snapshot comparison with added/removed/changed role counts, safe provenance,
+  cursor pagination, and dashboard history controls
 - deterministic unit, PostgreSQL, Neo4j, API, and full-pipeline tests in CI on Python 3.10 and 3.12
 
-Broader AWS identity coverage, relationship/edge projection, attack-path analysis, and runtime
-authorization remain planned work. A successful complete collection is projected, verified,
+M1 remains in progress. Broader AWS identity coverage, relationship/edge projection,
+attack-path analysis, and runtime authorization remain planned work. A successful complete
+collection is projected, verified,
 and promoted to `ready`; incomplete or failed collection is retained as a terminal failed
 snapshot and never becomes active. No trust or effective-access relationship is inferred in
 this role-only slice.
+
+The supporting M1a inventory-history milestone is implemented. Compare any two retained ready
+role snapshots from the same account; incomplete data cannot establish role absence. Metadata
+differences do not imply changed effective access. See [Inventory History](docs/INVENTORY_HISTORY.md)
+for the plan, API, limits, and acceptance criteria.
 
 ## Local development
 
@@ -49,8 +57,8 @@ docker compose up --build --detach --wait
 ```
 
 Set unique local-only values for `POSTGRES_PASSWORD`, `NEO4J_PASSWORD`, and
-`IDENTITYMESH_API_TOKEN`, plus the controlled 12-digit
-`IDENTITYMESH_AWS_ALLOWED_ACCOUNT_ID`, in `.env` before starting the stack. The API and
+`IDENTITYMESH_API_TOKEN` (32–256 printable, non-whitespace ASCII characters), plus the
+controlled 12-digit `IDENTITYMESH_AWS_ALLOWED_ACCOUNT_ID`, in `.env` before starting the stack. The API and
 dashboard are available at `http://127.0.0.1:8000`; verify the stack with:
 
 ```powershell
@@ -244,6 +252,7 @@ V1 prioritizes depth over breadth.
 - [System Requirements](docs/REQUIREMENTS.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Data Model](docs/DATA_MODEL.md)
+- [Inventory History](docs/INVENTORY_HISTORY.md)
 - [Attack Path Engine](docs/ATTACK_PATH_ENGINE.md)
 - [Policy Engine](docs/POLICY_ENGINE.md)
 - [Risk Model](docs/RISK_MODEL.md)

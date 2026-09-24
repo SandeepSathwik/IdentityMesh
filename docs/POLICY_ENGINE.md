@@ -3,6 +3,9 @@
 ## Objective
 Provide deterministic runtime authorization for sensitive actions using identity, delegation, scope, resource, and context.
 
+Status: planned. The current bearer token authenticates the local/test inventory API only; it
+is not the runtime authorization gateway or policy engine described here.
+
 ## Decision model
 V1 decisions:
 

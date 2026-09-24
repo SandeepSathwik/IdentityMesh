@@ -14,6 +14,7 @@ from identitymesh.collectors.aws_iam import (
     AwsRoleCollection,
     Boto3AwsIamApi,
 )
+from identitymesh.comparison_store import SnapshotComparisonService
 from identitymesh.config import Settings
 from identitymesh.graph_projection import Neo4jPrincipalProjector
 from identitymesh.identity_pipeline import AwsRoleIdentityPipeline, AwsRolePipelineCoordinator
@@ -82,7 +83,11 @@ async def create_runtime(settings: Settings) -> RuntimeResources:
         return RuntimeResources(
             pool=pool,
             driver=driver,
-            services=ApplicationServices(coordinator=coordinator, inventory=inventory),
+            services=ApplicationServices(
+                coordinator=coordinator,
+                inventory=inventory,
+                comparisons=SnapshotComparisonService(pool),
+            ),
         )
     except Exception:
         await driver.close()

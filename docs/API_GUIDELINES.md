@@ -43,6 +43,9 @@ The following `/api/v1` routes require `Authorization: Bearer <configured token>
   and promote one controlled-account role snapshot
 - `GET /api/v1/snapshots` — bounded newest-first lifecycle history
 - `GET /api/v1/snapshots/active` — authoritative active ready snapshot
+- `GET /api/v1/snapshots/compare` — paginated observed role changes between two explicit
+  complete ready snapshots; see [Inventory History](INVENTORY_HISTORY.md) for parameters,
+  response semantics, limits, and reason codes
 - `GET /api/v1/principals` — cursor-paginated normalized principals from the exact active graph
 - `GET /api/v1/graph` — basic role-node graph view; relationships are intentionally empty
 
@@ -50,8 +53,10 @@ The collection route accepts no credentials or account selector. AWS credentials
 from the standard provider chain, and the verified caller must match the configured account.
 Expected partial/provider outcomes return a terminal versioned run document; malformed,
 unauthenticated, unavailable, and concurrent requests use the standard error envelope.
-This single-token baseline is restricted by configuration validation to local and test
-environments; non-local deployment requires a future reviewed authentication design and TLS.
+The configured token must contain 32–256 printable, non-whitespace ASCII characters and is
+compared in constant time. This single-token baseline is restricted by configuration validation
+to local and test environments; non-local deployment requires a future reviewed authentication
+design and TLS.
 
 ## Authorization endpoint
 A conceptual request:
