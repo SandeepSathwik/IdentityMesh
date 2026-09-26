@@ -97,6 +97,22 @@ not require AWS credentials.
 The current single-token data API is intentionally accepted only in `local` and `test`
 environments. Do not expose it as a production authentication mechanism.
 
+## Collect and inspect IAM users
+
+Apply migrations to head, then use the dashboard's **Collect users** button, or:
+
+```powershell
+$run = Invoke-RestMethod -Method Post -Headers $headers `
+  http://127.0.0.1:8000/api/v1/collections/aws/iam/users
+Invoke-RestMethod -Headers $headers `
+  "http://127.0.0.1:8000/api/v1/snapshots/$($run.snapshot_id)/users?limit=50"
+```
+
+User collection requires read-only `iam:ListUsers` in the configured controlled account.
+It retains complete and partial observations separately from the active role graph; complete
+user snapshots are collected, not ready. Live AWS validation remains owner-run. See
+[AWS IAM user collection](AWS_USER_INVENTORY.md) for permissions, migration, and failure behavior.
+
 ## Compare retained observations
 
 After two successful collections, select the base and target in the dashboard's **Compare

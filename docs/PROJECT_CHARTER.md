@@ -127,8 +127,9 @@ The implemented first vertical slice inventories AWS IAM roles only. It preserve
 evidence in PostgreSQL, publishes a verified node-only Neo4j projection, and exposes that
 active projection through an authenticated local/test API and minimal dashboard. It also
 compares complete retained role observations with safe evidence references. It does not
-yet model trust, effective access, attack paths, runtime authorization, or the remaining AWS
-identity types. M1 therefore remains in progress.
+yet model trust, effective access, attack paths, or runtime authorization. IAM user observations
+are also collected, normalized, persisted, and inspected separately from the active role graph.
+Broader AWS identity and relationship coverage remains unfinished, so M1 stays in progress.
 
 ## Explicit non-goals
 IdentityMesh V1 is not intended to become:
@@ -159,7 +160,7 @@ A feature is not complete merely because it works locally. It should also have:
 - reproducible examples where practical
 
 ## Ownership model
-Human project owner:
+Project owner:
 - defines product direction
 - approves major architecture choices
 - accepts risk

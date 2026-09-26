@@ -38,6 +38,14 @@ Current AWS gap reason codes are:
 The contract contains factual trust-policy evidence but makes no effective-permission,
 ownership, or attack-path inference.
 
+The user collector adds `aws.iam.user/v1` and `aws.iam.user.collection/v1`, using
+STS identity verification and paginated `iam:ListUsers`. It requires an account allowlist,
+marks tags and permissions boundaries as uncollected, and reports collection bounds through
+`AWS_COLLECTION_LIMIT_EXCEEDED`. It normalizes cloud users and persists evidence and lifecycle
+atomically. Authenticated user routes expose collection outcomes and validated, paginated
+snapshot reads, including partial evidence. Complete user snapshots stay collected and never
+replace the active role graph. See [AWS IAM user collection](AWS_USER_INVENTORY.md).
+
 Normalizer must:
 - validate
 - produce internal IDs

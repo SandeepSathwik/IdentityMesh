@@ -133,4 +133,4 @@ A pull request affecting critical authorization or graph logic MUST:
 - preserve explainability
 - pass static analysis
 - pass security checks
-- be reviewed by the human owner before merge
+- be reviewed by the project owner before merge

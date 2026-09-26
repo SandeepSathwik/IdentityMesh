@@ -9,11 +9,13 @@ from neo4j import AsyncDriver, AsyncGraphDatabase
 from identitymesh.api import ApplicationServices
 from identitymesh.aws_collection_service import AwsIamRoleCollectionService
 from identitymesh.aws_evidence_store import AwsIamRoleEvidenceStore
+from identitymesh.aws_user_inventory import AwsUserInventoryService
 from identitymesh.collectors.aws_iam import (
     AwsIamRoleCollector,
     AwsRoleCollection,
     Boto3AwsIamApi,
 )
+from identitymesh.collectors.aws_iam_users import AwsIamUserCollector, AwsUserCollection
 from identitymesh.comparison_store import SnapshotComparisonService
 from identitymesh.config import Settings
 from identitymesh.graph_projection import Neo4jPrincipalProjector
@@ -35,6 +37,18 @@ class LazyBoto3AwsRoleCollector:
             allowed_account_id=self._allowed_account_id,
         )
         return collector.collect(snapshot_id)
+
+
+class LazyBoto3AwsUserCollector:
+    """Create the user client only inside an explicitly triggered worker run."""
+
+    def __init__(self, allowed_account_id: str) -> None:
+        self._allowed_account_id = allowed_account_id
+
+    def collect(self, snapshot_id: UUID) -> AwsUserCollection:
+        return AwsIamUserCollector(
+            Boto3AwsIamApi(), allowed_account_id=self._allowed_account_id
+        ).collect(snapshot_id)
 
 
 @dataclass(frozen=True, slots=True)
@@ -87,6 +101,9 @@ async def create_runtime(settings: Settings) -> RuntimeResources:
                 coordinator=coordinator,
                 inventory=inventory,
                 comparisons=SnapshotComparisonService(pool),
+                users=AwsUserInventoryService(
+                    pool, LazyBoto3AwsUserCollector(settings.aws_allowed_account_id)
+                ),
             ),
         )
     except Exception:

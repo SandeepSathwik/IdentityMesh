@@ -14,9 +14,11 @@ Features outside those pillars require strong justification.
 
 The repository currently implements only the first AWS IAM role vertical slice within this
 V1 scope. It collects roles, retains evidence, projects verified observed role nodes, and
-serves active inventory and complete-snapshot comparisons through a local/test API and dashboard. Users, groups, policies,
-OIDC providers, graph relationships, attack paths, and runtime enforcement remain future
-increments.
+serves active inventory and complete-snapshot comparisons through a local/test API and dashboard.
+IAM users also have an independent collection, normalization, persistence, and authenticated
+inspection flow. Their observations remain separate from the role-only active graph. Groups,
+policies, OIDC providers, graph relationships, attack paths, and runtime enforcement remain
+future increments.
 
 ## V1 in scope
 

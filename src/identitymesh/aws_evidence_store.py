@@ -48,7 +48,7 @@ class CollectorVersionMismatchError(AwsEvidenceStoreError):
 
     def __init__(self, snapshot_id: UUID) -> None:
         self.snapshot_id = snapshot_id
-        super().__init__(f"snapshot {snapshot_id} does not match the AWS role collector version")
+        super().__init__(f"snapshot {snapshot_id} does not match the expected collector version")
 
 
 @dataclass(frozen=True, slots=True)

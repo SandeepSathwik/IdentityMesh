@@ -189,6 +189,16 @@ relationship/edge projection are not yet implemented.
 
 ## Service topology
 
+### User observation collection
+
+IAM user collections use the same snapshot lifecycle and shared AWS collection lock, with a
+distinct collector version and independent attempt/gap tables. Evidence and normalized cloud
+users are finalized in one PostgreSQL transaction. Complete user snapshots remain collected;
+partial or failed attempts become failed. Snapshot-specific authenticated reads validate
+evidence and normalization in a repeatable-read transaction. The dashboard can inspect these
+observations without changing the singleton active role graph. Mixed-scope graph promotion
+remains deferred; see [AWS IAM user collection](AWS_USER_INVENTORY.md).
+
 ### Inventory history reads
 
 The comparison service reads two retained ready snapshots and their collection attempts,

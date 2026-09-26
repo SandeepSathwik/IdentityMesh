@@ -135,6 +135,14 @@ listing races, and syntactic-versus-semantic policy differences remain documente
 in [Inventory History](INVENTORY_HISTORY.md).
 
 ### Identity
+
+IAM user observations have an explicit account allowlist, typed source/partition checks,
+bounded pagination, immutable-ID duplicate detection, and safe collection gaps. PostgreSQL
+finalization is atomic; reads validate evidence and normalized records before returning safe
+principal references. The existing bearer token protects both collection and inspection.
+Partial user observations never imply absence or replace the role graph. Tags and permissions
+boundaries remain uncollected; password-last-used is omitted from API principal references.
+See [AWS IAM user collection](AWS_USER_INVENTORY.md) for scope and residual listing races.
 - authenticated callers
 - explicit principal type
 - scoped credentials

@@ -20,7 +20,7 @@ from pydantic import (
 )
 
 COLLECTOR_VERSION = "aws-iam-role/0.1"
-AwsOperation = Literal["sts:GetCallerIdentity", "iam:ListRoles"]
+AwsOperation = Literal["sts:GetCallerIdentity", "iam:ListRoles", "iam:ListUsers"]
 
 
 class CollectionStatus(str, Enum):
@@ -42,6 +42,7 @@ class CollectionReasonCode(str, Enum):
     API_ERROR = "AWS_API_ERROR"
     MALFORMED_RESPONSE = "AWS_MALFORMED_RESPONSE"
     ACCOUNT_NOT_ALLOWED = "AWS_ACCOUNT_NOT_ALLOWED"
+    LIMIT_EXCEEDED = "AWS_COLLECTION_LIMIT_EXCEEDED"
 
 
 class CollectionGap(BaseModel):
@@ -183,6 +184,11 @@ class Boto3AwsIamApi:
 
     def iter_role_pages(self) -> Iterator[Mapping[str, object]]:
         paginator = self._iam.get_paginator("list_roles")
+        yield from paginator.paginate()
+
+    def iter_user_pages(self) -> Iterator[Mapping[str, object]]:
+        """List user metadata only when explicitly invoked by a user collector."""
+        paginator = self._iam.get_paginator("list_users")
         yield from paginator.paginate()
 
 

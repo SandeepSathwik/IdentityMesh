@@ -33,6 +33,3 @@ architectural constraint; use `git ls-files` for the authoritative file list.
 - `docs/adr/` — accepted and proposed architecture decision records
 - `docs/INVENTORY_HISTORY.md` — implemented M1a plan, acceptance criteria, API, and limits
 - `.github/ISSUE_TEMPLATE/` and `.github/PULL_REQUEST_TEMPLATE.md` — contribution templates
-
-Local-only workspace guidance and intentionally untracked material are excluded from this
-public manifest.

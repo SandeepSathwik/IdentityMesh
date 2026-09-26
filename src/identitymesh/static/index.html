@@ -65,6 +65,21 @@
         <button id="comparison-more" class="secondary" type="button" hidden>Load more changes</button>
       </section>
 
+      <section class="panel" aria-labelledby="users-heading">
+        <div class="panel-heading">
+          <div><p class="eyebrow">User observations</p><h2 id="users-heading">IAM users</h2></div>
+          <button id="collect-users" class="secondary" type="button" disabled>Collect users</button>
+        </div>
+        <p class="lede">User collections are retained separately from the active role graph.
+          Partial results cannot establish absence. Tags, permissions boundaries, and access
+          relationships are not collected.</p>
+        <label for="user-snapshot">User collection</label>
+        <select id="user-snapshot" disabled></select>
+        <p id="user-status" role="status" aria-live="polite">Connect to load user collections.</p>
+        <div id="user-list" class="principal-list"></div>
+        <button id="user-more" class="secondary" type="button" hidden>Load more users</button>
+      </section>
+
       <div class="columns">
         <section class="panel">
           <div class="panel-heading">

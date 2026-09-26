@@ -30,6 +30,10 @@ authoritative evidence persistence, verified Neo4j node projection, authenticate
 inspection/triggering, lifecycle visibility, and a minimal dashboard are implemented. Broader
 AWS users, groups, policies, trust relationships, and OIDC coverage remain before M1 exit.
 
+[IAM user inventory](AWS_USER_INVENTORY.md) now includes collection, normalization, persistence,
+authenticated snapshot reads, and dashboard browsing. Mixed role/user graph projection and
+comparison remain pending; user observations do not replace the active role snapshot.
+
 Deliverables:
 - AWS collector
 - normalized identity model

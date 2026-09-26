@@ -51,6 +51,17 @@ responses. Tests cover pagination, complete-empty results, later-page failure, a
 authentication failure, throttling, connection failure, malformed responses, provenance, and
 schema validation without requiring cloud credentials.
 
+The IAM user collector additionally tests account/partition consistency, incomplete
+pagination, duplicate ARNs and immutable IDs, collection bounds, and explicit uncollected
+attributes. Botocore Stubber validates real SDK pagination parameters without network access.
+See [AWS IAM user collection](AWS_USER_INVENTORY.md) for its delivery boundary.
+
+User inventory PostgreSQL tests cover atomic finalization, concurrent retries, rollback,
+scope mismatch, corruption rejection, UUID pagination, authenticated HTTP flow, off-thread
+collection, shared advisory locking, and preservation of active roles. Migration tests verify
+that empty-schema downgrade/upgrade retains role snapshots and that retained user evidence
+blocks downgrade. User normalization tests distinguish renaming, recreation, and partitions.
+
 The AWS role normalizer has deterministic contract tests for observed provenance, stable
 identity across snapshots, distinct identity after role recreation, explicit deferred fields,
 rejection of unvalidated input, and timezone validation.

@@ -12,6 +12,7 @@ class PrincipalType(str, Enum):
     """Supported normalized principal classifications."""
 
     CLOUD_ROLE = "cloud_role"
+    CLOUD_USER = "cloud_user"
 
 
 class EvidenceClassification(str, Enum):

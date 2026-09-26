@@ -44,7 +44,7 @@ A feature is not complete until the relevant items below are satisfied.
 - ADR created if major decision
 
 ## Implementation review
-- code understood by human owner
+- code understood by the project owner
 - no unverifiable claims
 - no copied incompatible code/license
 - tests are independent enough to catch mistakes

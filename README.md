@@ -39,6 +39,11 @@ and promoted to `ready`; incomplete or failed collection is retained as a termin
 snapshot and never becomes active. No trust or effective-access relationship is inferred in
 this role-only slice.
 
+[IAM user inventory](docs/AWS_USER_INVENTORY.md) also supports collection, normalization,
+transactional persistence, authenticated snapshot-specific reads, and dashboard browsing.
+User observations remain separate from the active role graph and role comparison scope.
+Live user collection requires `iam:ListUsers`; no cloud permissions are applied automatically.
+
 The supporting M1a inventory-history milestone is implemented. Compare any two retained ready
 role snapshots from the same account; incomplete data cannot establish role absence. Metadata
 differences do not imply changed effective access. See [Inventory History](docs/INVENTORY_HISTORY.md)

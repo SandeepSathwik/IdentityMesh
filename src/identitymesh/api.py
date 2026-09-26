@@ -10,6 +10,12 @@ from fastapi import APIRouter, Depends, Query, Request, status
 from pydantic import BaseModel, ConfigDict, Field
 
 from identitymesh.aws_collection_service import AwsCollectionRunError
+from identitymesh.aws_user_inventory import (
+    AwsUserInventoryService,
+    UserCollectionRun,
+    UserInventoryError,
+    UserInventoryPage,
+)
 from identitymesh.comparison_store import SnapshotComparisonService
 from identitymesh.config import Settings
 from identitymesh.graph_projection import GraphProjectionError, ProjectedPrincipal
@@ -49,6 +55,7 @@ class ApplicationServices:
     coordinator: AwsRolePipelineCoordinator
     inventory: InventoryService
     comparisons: SnapshotComparisonService | None = None
+    users: AwsUserInventoryService | None = None
 
 
 class SnapshotResponse(BaseModel):
@@ -216,6 +223,47 @@ def build_data_router(settings: Settings) -> APIRouter:
             )
 
     auth = Depends(require_bearer)
+
+    @router.post(
+        "/collections/aws/iam/users",
+        response_model=UserCollectionRun,
+        dependencies=[auth],
+        tags=["collection"],
+    )
+    async def collect_aws_users(request: Request) -> UserCollectionRun:
+        users = _services(request).users
+        if users is None:
+            raise ApiError(503, "USER_INVENTORY_UNAVAILABLE", "User inventory is unavailable.")
+        try:
+            return await users.run()
+        except CollectionAlreadyRunningError as error:
+            raise ApiError(
+                409, error.reason_code, "An AWS collection is already running."
+            ) from error
+        except AwsCollectionRunError as error:
+            raise ApiError(
+                500, error.reason_code, "The AWS user collection could not be completed safely."
+            ) from error
+
+    @router.get(
+        "/snapshots/{snapshot_id}/users",
+        response_model=UserInventoryPage,
+        dependencies=[auth],
+        tags=["inventory"],
+    )
+    async def list_snapshot_users(
+        request: Request,
+        snapshot_id: UUID,
+        limit: int = Query(default=50, ge=1, le=100),
+        cursor: UUID | None = Query(default=None),
+    ) -> UserInventoryPage:
+        users = _services(request).users
+        if users is None:
+            raise ApiError(503, "USER_INVENTORY_UNAVAILABLE", "User inventory is unavailable.")
+        try:
+            return await users.users(snapshot_id, limit=limit, cursor=cursor)
+        except UserInventoryError as error:
+            raise ApiError(error.status_code, error.reason_code, str(error)) from error
 
     @router.get(
         "/snapshots/compare",

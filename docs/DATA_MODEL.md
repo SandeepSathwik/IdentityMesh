@@ -260,6 +260,15 @@ codes. Incomplete collection remains inspectable without silently replacing the 
 snapshot. A complete collection proceeds through verified graph projection and becomes active
 only after `complete_projection` succeeds.
 
+### IAM user observations
+
+`aws.iam.user/v1` and its collection envelope retain validated ListUsers metadata, completeness,
+and explicit uncollected attributes. Migration `20260925_0003` adds user attempts and gaps;
+evidence and normalized `cloud_user` principals reuse the existing tables. User principal IDs
+include partition, account, object type, and immutable UserId. Renames preserve identity;
+recreation and separate partitions do not alias. User observations do not enter the role-only
+graph or comparisons. See [AWS IAM user collection](AWS_USER_INVENTORY.md).
+
 ## Schema evolution
 - avoid exposing database schema directly as public API
 - use migration tooling

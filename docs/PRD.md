@@ -5,7 +5,9 @@ IdentityMesh is a security platform for identity discovery, privilege graphing, 
 
 Current pre-alpha delivery covers one AWS IAM role vertical slice: collection, normalization,
 authoritative evidence persistence, verified node-only graph projection, authenticated
-inspection/collection APIs, evidence-backed role snapshot comparison, and a minimal dashboard. The broader requirements below remain
+inspection/collection APIs, evidence-backed role snapshot comparison, and a minimal dashboard.
+IAM users have a separate persisted observation flow and dashboard inspection panel, without
+replacing the role-only active graph. The broader requirements below remain
 the product target and must not be read as already implemented.
 
 ## 2. Problem statement

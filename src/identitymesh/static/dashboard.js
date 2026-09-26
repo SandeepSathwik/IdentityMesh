@@ -8,6 +8,88 @@
   let comparisonQuery = null;
   let comparisonCursor = null;
   let comparisonGeneration = 0;
+  let userGeneration = 0;
+  let userCursor = null;
+
+  function resetUsers() {
+    userGeneration += 1;
+    userCursor = null;
+    clear(byId("user-list"));
+    byId("user-more").hidden = true;
+  }
+
+  function userChoices(items, preferred = byId("user-snapshot").value) {
+    resetUsers();
+    const select = byId("user-snapshot");
+    clear(select);
+    const snapshots = items.filter((item) => item.collector_version === "aws-iam-user/0.1");
+    snapshots.forEach((item) => {
+      const option = document.createElement("option");
+      option.value = item.snapshot_id;
+      option.textContent = `#${item.sequence_id} · ${item.status} · ${formatTime(item.created_at)}`;
+      select.appendChild(option);
+    });
+    select.disabled = snapshots.length === 0;
+    if (snapshots.some((item) => item.snapshot_id === preferred)) select.value = preferred;
+    byId("user-status").textContent = snapshots.length
+      ? "Select a collection to inspect its observed users."
+      : "No user collections in the latest 100 attempts. Collect users to create one.";
+    if (snapshots.length) loadUsers();
+  }
+
+  async function loadUsers(append = false) {
+    const snapshotId = byId("user-snapshot").value;
+    if (!snapshotId) return;
+    const generation = userGeneration;
+    const query = new URLSearchParams({ limit: "50" });
+    if (append && userCursor) query.set("cursor", userCursor);
+    byId("user-more").disabled = true;
+    byId("user-status").textContent = "Loading user observations…";
+    try {
+      const page = await api(`/api/v1/snapshots/${encodeURIComponent(snapshotId)}/users?${query}`);
+      if (generation !== userGeneration) return;
+      const list = byId("user-list");
+      page.items.forEach((item) => list.appendChild(record(
+        item.display_name, item.provenance.source_object_id, [item.external_id, item.principal_type]
+      )));
+      userCursor = page.next_cursor;
+      byId("user-more").hidden = !userCursor;
+      const gaps = page.gaps.map((gap) => `${gap.operation}: ${gap.reason_code}`).join("; ");
+      byId("user-status").textContent =
+        `${page.collection_status} · ${list.children.length} of ${page.total_count} observed users · ` +
+        `${formatTime(page.collected_at)}. ` +
+        (page.collection_status === "complete"
+          ? "Complete user listing; access is not evaluated."
+          : "Incomplete evidence cannot establish user absence.") + (gaps ? ` ${gaps}` : "");
+    } catch (error) {
+      if (generation !== userGeneration) return;
+      resetUsers();
+      byId("user-status").textContent = `${error.code || "REQUEST_FAILED"}: ${error.message}`;
+    } finally {
+      if (generation === userGeneration) byId("user-more").disabled = false;
+    }
+  }
+
+  byId("user-snapshot").addEventListener("change", () => {
+    resetUsers();
+    loadUsers();
+  });
+  byId("user-more").addEventListener("click", () => loadUsers(true));
+  byId("collect-users").addEventListener("click", async () => {
+    byId("collect-users").disabled = true;
+    collectButton.disabled = true;
+    resetUsers();
+    byId("user-status").textContent = "Collecting and retaining AWS user observations…";
+    try {
+      const run = await api("/api/v1/collections/aws/iam/users", { method: "POST" });
+      await loadSnapshots(run.snapshot_id);
+    } catch (error) {
+      byId("user-status").textContent = `${error.code || "REQUEST_FAILED"}: ${error.message}`;
+    } finally {
+      byId("collect-users").disabled = false;
+      collectButton.disabled = false;
+    }
+  });
 
   function resetComparison() {
     comparisonGeneration += 1;
@@ -19,7 +101,8 @@
 
   function comparisonChoices(items) {
     resetComparison();
-    const ready = items.filter((item) => item.status === "ready");
+    const ready = items.filter((item) => item.status === "ready"
+      && item.collector_version === "aws-iam-role/0.1");
     for (const id of ["comparison-base", "comparison-target"]) {
       const select = byId(id);
       clear(select);
@@ -166,16 +249,18 @@
     clear(list);
     items.forEach((item) => {
       const failed = item.status === "failed";
-      const details = [item.status, formatTime(item.ready_at || item.failed_at || item.created_at)];
+      const details = [item.status, item.collector_version,
+        formatTime(item.ready_at || item.failed_at || item.created_at)];
       if (item.failure_code) details.push(item.failure_code);
       list.appendChild(record(`Snapshot ${item.sequence_id}`, item.snapshot_id, details, failed));
     });
   }
 
-  async function loadSnapshots() {
+  async function loadSnapshots(preferredUser) {
     const snapshots = await api("/api/v1/snapshots?limit=100");
     renderSnapshots(snapshots.items.slice(0, 20));
     comparisonChoices(snapshots.items);
+    userChoices(snapshots.items, preferredUser);
   }
 
   function renderGraph(nodes) {
@@ -247,9 +332,12 @@
     token = tokenInput.value;
     tokenInput.value = "";
     comparisonChoices([]);
+    userChoices([]);
     collectButton.disabled = false;
+    byId("collect-users").disabled = true;
     try {
       await refresh();
+      byId("collect-users").disabled = false;
     } catch (error) {
       collectButton.disabled = true;
       setNotice(error.message, true);
@@ -258,6 +346,7 @@
 
   collectButton.addEventListener("click", async () => {
     collectButton.disabled = true;
+    byId("collect-users").disabled = true;
     setNotice("Collecting AWS roles and verifying the graph projection…");
     try {
       const run = await api("/api/v1/collections/aws/iam/roles", { method: "POST" });
@@ -271,6 +360,7 @@
       setNotice(error.message, true);
     } finally {
       collectButton.disabled = false;
+      byId("collect-users").disabled = false;
     }
   });
 })();
