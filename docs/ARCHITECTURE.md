@@ -209,6 +209,12 @@ The API and dashboard expose counts and safe before/after references, excluding 
 tag, and description values or inferred permissions. See
 [ADR-0002](adr/0002-observed-inventory-comparison.md).
 
+User history reuses the validated user read path in one read-only repeatable-read transaction.
+It requires complete collected observations from the same account and partition, preserving
+user identity through renames and distinguishing recreation. Its separate API and dashboard
+scope preserve role comparison and active graph behavior. See
+[IAM user inventory history](USER_INVENTORY_HISTORY.md).
+
 ### Early stage
 Prefer a modular monolith or small number of services.
 

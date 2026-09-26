@@ -96,6 +96,11 @@ Reference scenarios:
 - approval -> constrained allow
 - lab deployment -> collection -> expected finding
 
+User-history tests additionally cover renames, recreation, path/creation metadata, excluded
+password usage, complete-empty partition mismatch, retained historical pagination, source
+revalidation on every page, structured failures, and unchanged active-role state. The user
+and role dashboard panels retain independent snapshot choices and pagination state.
+
 ### Security tests
 - auth bypass attempts
 - malformed delegation

@@ -28,6 +28,7 @@ from identitymesh.identity_pipeline import (
 from identitymesh.inventory import ActiveSnapshotNotFoundError, InventoryService
 from identitymesh.snapshot_comparison import ComparisonError, ComparisonResponse
 from identitymesh.snapshots import Snapshot
+from identitymesh.user_comparison import UserComparisonResponse, UserComparisonService
 
 
 class ApiError(Exception):
@@ -56,6 +57,7 @@ class ApplicationServices:
     inventory: InventoryService
     comparisons: SnapshotComparisonService | None = None
     users: AwsUserInventoryService | None = None
+    user_comparisons: UserComparisonService | None = None
 
 
 class SnapshotResponse(BaseModel):
@@ -223,6 +225,29 @@ def build_data_router(settings: Settings) -> APIRouter:
             )
 
     auth = Depends(require_bearer)
+
+    @router.get(
+        "/snapshots/users/compare",
+        response_model=UserComparisonResponse,
+        dependencies=[auth],
+        tags=["inventory"],
+    )
+    async def compare_user_snapshots(
+        request: Request,
+        base_snapshot_id: UUID,
+        target_snapshot_id: UUID,
+        limit: int = Query(default=50, ge=1, le=100),
+        cursor: UUID | None = Query(default=None),
+    ) -> UserComparisonResponse:
+        comparisons = _services(request).user_comparisons
+        if comparisons is None:
+            raise ApiError(503, "COMPARISON_UNAVAILABLE", "User comparison is unavailable.")
+        try:
+            return await comparisons.compare(
+                base_snapshot_id, target_snapshot_id, limit=limit, cursor=cursor
+            )
+        except ComparisonError as error:
+            raise ApiError(error.status_code, error.reason_code, str(error)) from error
 
     @router.post(
         "/collections/aws/iam/users",

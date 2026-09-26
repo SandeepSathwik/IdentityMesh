@@ -23,6 +23,7 @@ from identitymesh.identity_pipeline import AwsRoleIdentityPipeline, AwsRolePipel
 from identitymesh.inventory import InventoryService
 from identitymesh.principal_store import PrincipalStore
 from identitymesh.snapshot_store import SnapshotStore
+from identitymesh.user_comparison import UserComparisonService
 
 
 class LazyBoto3AwsRoleCollector:
@@ -101,6 +102,7 @@ async def create_runtime(settings: Settings) -> RuntimeResources:
                 coordinator=coordinator,
                 inventory=inventory,
                 comparisons=SnapshotComparisonService(pool),
+                user_comparisons=UserComparisonService(pool),
                 users=AwsUserInventoryService(
                     pool, LazyBoto3AwsUserCollector(settings.aws_allowed_account_id)
                 ),

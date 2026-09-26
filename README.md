@@ -42,6 +42,8 @@ this role-only slice.
 [IAM user inventory](docs/AWS_USER_INVENTORY.md) also supports collection, normalization,
 transactional persistence, authenticated snapshot-specific reads, and dashboard browsing.
 User observations remain separate from the active role graph and role comparison scope.
+[M1b user history](docs/USER_INVENTORY_HISTORY.md) compares complete retained user observations,
+including renames and recreation, through the authenticated API and dashboard.
 Live user collection requires `iam:ListUsers`; no cloud permissions are applied automatically.
 
 The supporting M1a inventory-history milestone is implemented. Compare any two retained ready

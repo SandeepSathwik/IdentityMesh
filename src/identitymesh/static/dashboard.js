@@ -5,9 +5,6 @@
   const byId = (id) => document.getElementById(id);
   const notice = byId("notice");
   const collectButton = byId("collect-button");
-  let comparisonQuery = null;
-  let comparisonCursor = null;
-  let comparisonGeneration = 0;
   let userGeneration = 0;
   let userCursor = null;
 
@@ -91,94 +88,116 @@
     }
   });
 
-  function resetComparison() {
-    comparisonGeneration += 1;
-    comparisonQuery = null;
-    comparisonCursor = null;
-    clear(byId("comparison-list"));
-    byId("comparison-more").hidden = true;
-  }
+  function createComparisonPanel({ prefix, endpoint, collectorVersion, snapshotStatus, entityId, help }) {
+    let comparisonQuery = null;
+    let comparisonCursor = null;
+    let comparisonGeneration = 0;
+    const element = (suffix) => byId(`${prefix}-${suffix}`);
 
-  function comparisonChoices(items) {
-    resetComparison();
-    const ready = items.filter((item) => item.status === "ready"
-      && item.collector_version === "aws-iam-role/0.1");
-    for (const id of ["comparison-base", "comparison-target"]) {
-      const select = byId(id);
-      clear(select);
-      ready.forEach((item) => {
-        const option = document.createElement("option");
-        option.value = item.snapshot_id;
-        option.textContent = `#${item.sequence_id} · ${formatTime(item.collected_at)}`;
-        select.appendChild(option);
-      });
-      select.disabled = ready.length < 2;
-    }
-    if (ready.length >= 2) byId("comparison-base").value = ready[1].snapshot_id;
-    byId("compare-button").disabled = ready.length < 2;
-    byId("comparison-status").textContent = ready.length < 2
-      ? "Two ready snapshots are needed. Incomplete collections cannot establish absence."
-      : "Choose from the latest 100 collection attempts. Raw policy and tag values stay private.";
-  }
-
-  async function loadComparison(append = false) {
-    if (!comparisonQuery) return;
-    const generation = comparisonGeneration;
-    const query = new URLSearchParams(comparisonQuery);
-    if (append && comparisonCursor) query.set("cursor", comparisonCursor);
-    byId("compare-button").disabled = true;
-    byId("comparison-more").disabled = true;
-    byId("comparison-status").textContent = "Comparing complete observations…";
-    try {
-      const result = await api(`/api/v1/snapshots/compare?${query}`);
-      if (generation !== comparisonGeneration) return;
-      const list = byId("comparison-list");
-      result.items.forEach((change) => {
-        const role = change.after || change.before;
-        list.appendChild(record(`${change.kind}: ${role.display_name}`, role.source_id,
-          [role.role_id, ...change.changed_fields]));
-      });
-      comparisonCursor = result.next_cursor;
-      byId("comparison-more").hidden = !comparisonCursor;
-      byId("comparison-status").textContent =
-        `${result.added_count} added · ${result.removed_count} removed · ` +
-        `${result.changed_count} changed · ${result.unchanged_count} unchanged. ` +
-        `Showing ${list.children.length} of ${result.total_count} changes. ` +
-        `Account ${result.account_id}; ${formatTime(result.base_collected_at)} → ` +
-        `${formatTime(result.target_collected_at)}. Metadata differences do not establish access.`;
-    } catch (error) {
-      if (generation !== comparisonGeneration) return;
-      // Never leave a successful-looking partial comparison after an error.
-      clear(byId("comparison-list"));
+    function resetComparison() {
+      comparisonGeneration += 1;
+      comparisonQuery = null;
       comparisonCursor = null;
-      byId("comparison-more").hidden = true;
-      byId("comparison-status").textContent = `${error.code || "REQUEST_FAILED"}: ${error.message}`;
-    } finally {
-      if (generation === comparisonGeneration) {
-        byId("compare-button").disabled = false;
-        byId("comparison-more").disabled = false;
+      clear(element("list"));
+      element("more").hidden = true;
+    }
+
+    function comparisonChoices(items) {
+      resetComparison();
+      const ready = items.filter((item) => item.status === snapshotStatus
+        && item.collector_version === collectorVersion);
+      for (const id of ["base", "target"]) {
+        const select = element(id);
+        clear(select);
+        ready.forEach((item) => {
+          const option = document.createElement("option");
+          option.value = item.snapshot_id;
+          option.textContent = `#${item.sequence_id} · ${formatTime(item.collected_at)}`;
+          select.appendChild(option);
+        });
+        select.disabled = ready.length < 2;
+      }
+      if (ready.length >= 2) element("base").value = ready[1].snapshot_id;
+      element("button").disabled = ready.length < 2;
+      element("status").textContent = ready.length < 2
+        ? "Two complete observations are needed. Incomplete collections cannot establish absence."
+        : help;
+    }
+
+    async function loadComparison(append = false) {
+      if (!comparisonQuery) return;
+      const generation = comparisonGeneration;
+      const query = new URLSearchParams(comparisonQuery);
+      if (append && comparisonCursor) query.set("cursor", comparisonCursor);
+      element("button").disabled = true;
+      element("more").disabled = true;
+      element("status").textContent = "Comparing complete observations…";
+      try {
+        const result = await api(`${endpoint}?${query}`);
+        if (generation !== comparisonGeneration) return;
+        const list = element("list");
+        result.items.forEach((change) => {
+          const identity = change.after || change.before;
+          const names = change.before && change.after && change.before.display_name !== change.after.display_name
+            ? `${change.before.display_name} → ${change.after.display_name}` : identity.display_name;
+          list.appendChild(record(`${change.kind}: ${names}`, identity.source_id,
+            [identity[entityId], ...change.changed_fields]));
+        });
+        comparisonCursor = result.next_cursor;
+        element("more").hidden = !comparisonCursor;
+        element("status").textContent =
+          `${result.added_count} added · ${result.removed_count} removed · ` +
+          `${result.changed_count} changed · ${result.unchanged_count} unchanged. ` +
+          `Showing ${list.children.length} of ${result.total_count} changes. ` +
+          `Account ${result.account_id}${result.partition ? ` (${result.partition})` : ""}; ${formatTime(result.base_collected_at)} → ` +
+          `${formatTime(result.target_collected_at)}. Metadata differences do not establish access.`;
+      } catch (error) {
+        if (generation !== comparisonGeneration) return;
+        // Never leave a successful-looking partial comparison after an error.
+        clear(element("list"));
+        comparisonCursor = null;
+        element("more").hidden = true;
+        element("status").textContent = `${error.code || "REQUEST_FAILED"}: ${error.message}`;
+      } finally {
+        if (generation === comparisonGeneration) {
+          element("button").disabled = false;
+          element("more").disabled = false;
+        }
       }
     }
+
+    element("form").addEventListener("submit", (event) => {
+      event.preventDefault();
+      resetComparison();
+      comparisonQuery = {
+        base_snapshot_id: element("base").value,
+        target_snapshot_id: element("target").value,
+        limit: "50",
+      };
+      loadComparison();
+    });
+    element("more").addEventListener("click", () => loadComparison(true));
+    for (const id of ["base", "target"]) {
+      element(id).addEventListener("change", () => {
+        resetComparison();
+        element("button").disabled = false;
+        element("status").textContent = "Selection changed. Compare to load these observations.";
+      });
+    }
+
+    return comparisonChoices;
   }
 
-  byId("comparison-form").addEventListener("submit", (event) => {
-    event.preventDefault();
-    resetComparison();
-    comparisonQuery = {
-      base_snapshot_id: byId("comparison-base").value,
-      target_snapshot_id: byId("comparison-target").value,
-      limit: "50",
-    };
-    loadComparison();
+  const comparisonChoices = createComparisonPanel({
+    prefix: "comparison", endpoint: "/api/v1/snapshots/compare",
+    collectorVersion: "aws-iam-role/0.1", snapshotStatus: "ready", entityId: "role_id",
+    help: "Choose from the latest 100 collection attempts. Raw policy and tag values stay private.",
   });
-  byId("comparison-more").addEventListener("click", () => loadComparison(true));
-  for (const id of ["comparison-base", "comparison-target"]) {
-    byId(id).addEventListener("change", () => {
-      resetComparison();
-      byId("compare-button").disabled = false;
-      byId("comparison-status").textContent = "Selection changed. Compare to load these observations.";
-    });
-  }
+  const userComparisonChoices = createComparisonPanel({
+    prefix: "user-comparison", endpoint: "/api/v1/snapshots/users/compare",
+    collectorVersion: "aws-iam-user/0.1", snapshotStatus: "collected", entityId: "user_id",
+    help: "Choose complete user observations from the latest 100 attempts. Password usage is excluded.",
+  });
 
   function setNotice(message, isError = false) {
     notice.textContent = message;
@@ -260,6 +279,7 @@
     const snapshots = await api("/api/v1/snapshots?limit=100");
     renderSnapshots(snapshots.items.slice(0, 20));
     comparisonChoices(snapshots.items);
+    userComparisonChoices(snapshots.items);
     userChoices(snapshots.items, preferredUser);
   }
 
@@ -332,6 +352,7 @@
     token = tokenInput.value;
     tokenInput.value = "";
     comparisonChoices([]);
+    userComparisonChoices([]);
     userChoices([]);
     collectButton.disabled = false;
     byId("collect-users").disabled = true;

@@ -10,7 +10,9 @@ and isolated PostgreSQL integration tests. M1 remains in progress.
 User observations are separate from the active role graph. Complete user collections remain
 `collected`; incomplete collections become `failed` with retained evidence and reason codes.
 They never replace the active role snapshot, enter role comparisons, or become graph nodes.
-Mixed inventory promotion and user comparison remain future work.
+Mixed inventory promotion remains future work.
+[IAM user inventory history](USER_INVENTORY_HISTORY.md) compares complete user observations
+through a separate authenticated API and dashboard panel.
 
 The goal is to establish reliable user-listing evidence before expanding the active graph.
 Inputs are an explicit allowed account ID, a snapshot UUID, and an AWS provider adapter.

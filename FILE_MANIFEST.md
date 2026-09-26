@@ -11,6 +11,7 @@ architectural constraint; use `git ls-files` for the authoritative file list.
 - `tests/` — unit, API, PostgreSQL, Neo4j, and synthetic full-pipeline integration tests
 - `src/identitymesh/snapshot_comparison.py` and `comparison_store.py` — deterministic observed
   role differences and validated PostgreSQL history reads
+- `src/identitymesh/user_comparison.py` — complete IAM user history with safe evidence references
 - `migrations/` — Alembic revisions for snapshot lifecycle and AWS evidence persistence
 
 ## Runtime and tooling
@@ -32,4 +33,5 @@ architectural constraint; use `git ls-files` for the authoritative file list.
 - `docs/` — product, architecture, security, testing, development, and planning references
 - `docs/adr/` — accepted and proposed architecture decision records
 - `docs/INVENTORY_HISTORY.md` — implemented M1a plan, acceptance criteria, API, and limits
+- `docs/USER_INVENTORY_HISTORY.md` — implemented M1b plan, comparison semantics, and limits
 - `.github/ISSUE_TEMPLATE/` and `.github/PULL_REQUEST_TEMPLATE.md` — contribution templates

@@ -51,14 +51,14 @@
 
       <section class="panel comparison-panel" aria-labelledby="comparison-heading">
         <p class="eyebrow">Inventory history</p>
-        <h2 id="comparison-heading">Compare observations</h2>
+        <h2 id="comparison-heading">Compare role observations</h2>
         <p class="lede">Choose two ready snapshots from the same AWS account. Differences describe
           collected role metadata, not effective permissions. Removed means absent from the later
           collection; AWS listings are not atomic point-in-time inventories.</p>
         <form id="comparison-form" class="comparison-controls">
           <label>Base snapshot <select id="comparison-base" required disabled></select></label>
           <label>Target snapshot <select id="comparison-target" required disabled></select></label>
-          <button id="compare-button" type="submit" disabled>Compare</button>
+          <button id="comparison-button" type="submit" disabled>Compare</button>
         </form>
         <p id="comparison-status" role="status" aria-live="polite">Connect to load snapshot choices.</p>
         <div id="comparison-list" class="principal-list"></div>
@@ -78,6 +78,23 @@
         <p id="user-status" role="status" aria-live="polite">Connect to load user collections.</p>
         <div id="user-list" class="principal-list"></div>
         <button id="user-more" class="secondary" type="button" hidden>Load more users</button>
+      </section>
+
+      <section class="panel comparison-panel" aria-labelledby="user-comparison-heading">
+        <p class="eyebrow">User history</p>
+        <h2 id="user-comparison-heading">Compare user observations</h2>
+        <p class="lede">Choose complete user collections from the same AWS account and partition.
+          Renames preserve identity; a recreated user appears as a removal and addition.
+          Removed means absent from the later listing, not proof of a deletion event.
+          Password usage and uncollected attributes are excluded; access is not evaluated.</p>
+        <form id="user-comparison-form" class="comparison-controls">
+          <label>Base snapshot <select id="user-comparison-base" required disabled></select></label>
+          <label>Target snapshot <select id="user-comparison-target" required disabled></select></label>
+          <button id="user-comparison-button" type="submit" disabled>Compare users</button>
+        </form>
+        <p id="user-comparison-status" role="status" aria-live="polite">Connect to load snapshot choices.</p>
+        <div id="user-comparison-list" class="principal-list"></div>
+        <button id="user-comparison-more" class="secondary" type="button" hidden>Load more changes</button>
       </section>
 
       <div class="columns">

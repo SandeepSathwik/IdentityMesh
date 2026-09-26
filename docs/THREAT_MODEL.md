@@ -134,6 +134,12 @@ remain observations and cannot authorize actions. Trusted database compromise, p
 listing races, and syntactic-versus-semantic policy differences remain documented limitations
 in [Inventory History](INVENTORY_HISTORY.md).
 
+User history applies the same absence constraints to complete collected user observations,
+with explicit account and partition compatibility even when both listings are empty. It reuses
+user evidence/normalization validation and excludes password usage from comparisons and output.
+Unsupported lifecycle states, partial listings, and corrupt data cannot become removals. See
+[IAM user inventory history](USER_INVENTORY_HISTORY.md).
+
 ### Identity
 
 IAM user observations have an explicit account allowlist, typed source/partition checks,

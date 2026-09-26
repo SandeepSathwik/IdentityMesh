@@ -31,8 +31,9 @@ inspection/triggering, lifecycle visibility, and a minimal dashboard are impleme
 AWS users, groups, policies, trust relationships, and OIDC coverage remain before M1 exit.
 
 [IAM user inventory](AWS_USER_INVENTORY.md) now includes collection, normalization, persistence,
-authenticated snapshot reads, and dashboard browsing. Mixed role/user graph projection and
-comparison remain pending; user observations do not replace the active role snapshot.
+authenticated snapshot reads, and dashboard browsing. Mixed role/user graph projection remains
+pending. User history has its own comparison scope; user observations do not replace the active
+role snapshot.
 
 Deliverables:
 - AWS collector
@@ -58,6 +59,21 @@ Deliverables and exit criteria:
 - deterministic unit/API tests and real PostgreSQL regression tests
 
 See [Inventory History](INVENTORY_HISTORY.md) for implementation, limits, and follow-up scope.
+
+### M1b — IAM user inventory history
+
+Status: implemented on 2026-09-25 as a supporting milestone; broader M1 remains in progress.
+
+Deliverables and exit criteria:
+- compare complete retained user observations in the same account and partition
+- distinguish renames from recreation using immutable user identity
+- expose safe before/after references, whole-comparison counts, and cursor pagination
+- reject incomplete, incompatible, missing, or corrupt observations
+- provide independent role/user dashboard history controls with stale-response protection
+- preserve the active role graph and existing collection/authentication contracts
+- deterministic API/unit tests and real PostgreSQL regression tests
+
+See [IAM user inventory history](USER_INVENTORY_HISTORY.md) for the plan, contract, and limits.
 
 ## M2 — AWS Attack Paths
 Target: End Month 4

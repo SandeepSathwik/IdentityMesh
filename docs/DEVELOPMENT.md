@@ -128,6 +128,11 @@ Set `$baseId` and `$targetId` from `GET /api/v1/snapshots`. Keep both IDs unchan
 [Inventory History](INVENTORY_HISTORY.md) for failure codes and scope. No migration is needed
 for comparison of existing role snapshots.
 
+For users, choose **Compare user observations** or use the same query parameters with
+`GET /api/v1/snapshots/users/compare`. Both inputs must be complete user collections in the
+same account and partition. No additional migration or AWS permission is needed. See
+[IAM user inventory history](USER_INVENTORY_HISTORY.md) for semantics and error codes.
+
 ## Migrations
 
 With `IDENTITYMESH_POSTGRES_DSN` set for the target database:
